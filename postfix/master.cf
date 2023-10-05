@@ -160,5 +160,5 @@ policy    unix  -       n       n       -       -       spawn
 #  flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py
 #  ${nexthop} ${user}
 pythontransport   unix  -       n       n       -       -       pipe
-  flags=FR user=arnavsajith argv=/Users/arnavsajith/Documents/EMPT/script1.py
+  flags=FR user=arnavsajith argv=/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/activate_venv.sh
   ${nexthop} ${user}
