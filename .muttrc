@@ -1,10 +1,10 @@
 set folder=~/Maildir/
 set edit_headers=yes
 set realname="Arnav Sajith"
-set from="arnav@arnav.local"
+set from="arnavsajith@arnav.local"
 set editor=vim
-set spoolfile=~/Maildir/
+set spoolfile=+INBOX
 set timeout=5
 color index blue default ~P
 
-mailboxes +Maildir
+mailboxes +inbox
