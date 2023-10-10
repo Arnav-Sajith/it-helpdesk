@@ -1,12 +1,13 @@
 import re
+from pyisemail import is_email
 headers_dictionary = {}
 headers_dictionary['from'] = 'arnavsajith@arnav.local'
 headers_dictionary['id'] = 'F2670D23433'
 headers_dictionary['to'] = 'arnavsajith@arnav.local'
-headers_dictionary['subject'] = 'Increase User Storage'
+headers_dictionary['subject'] = 'Increase user Storage'
 headers_dictionary['message-id'] = '20231010040739.F2670D23433@arnav.local'
 headers_dictionary['date'] = 'Tue 10 Oct 2023 00:07:39 -0400 (EDT)'
-headers_dictionary['body'] = '''Hello, I'd like to increase congbine the storage quota for user: arnavsajith@arnav.local to 5.5gb'''
+headers_dictionary['body'] = '''Hello, I'd like to increase the storage quota for user: arnavsajith@arnav.local to 5.5gb'''
 
 storage_phrases_dict = {}
 
@@ -50,7 +51,7 @@ def parse_subject(headers_dictionary):
     if any((match := negative_verb) in subject for negative_verb in storage_phrases["verbs_negative"][0]):
         negative_verb = True
         print("Request type = negative verb", match)
-    if any((match := target) in subject for target in storage_phrases["targets"][0]):
+    if any((match := target) in subject for target in storage_phrases["targets"][0]) and not any(self_target in subject for self_target in storage_phrases["selftargets"][0]):
         target_not_sender = True
         print("target found:", match)
     if (positive_verb and negative_verb):
@@ -61,16 +62,11 @@ def parse_subject(headers_dictionary):
         return valid_request, storage_request, positive_verb, negative_verb, target_not_sender
 
 
-def execute_request(valid_request: bool, storage_request: bool, positive_verb: bool, negative_verb: bool, target_not_sender: bool):
-    if valid_request == False:
-        return "invalid request subject"
-    if storage_request == True and target_not_sender == True:
-        parse_body("storage", target_not_sender)
-
 def parse_body(request_type, target_not_sender: bool):
-   
+    print(target_not_sender)
     body = headers_dictionary['body'].lower()
-    amount = {"modifier": None, "amount": None, "unit": None}
+    body_words = body.split()
+    amount = {"modifier": None, "amount": None, "unit": None, "target": None}
     if request_type == "storage":
         storage_phrases = load_phrases()
         amount_phrases = storage_phrases["amount"][0]
@@ -80,7 +76,6 @@ def parse_body(request_type, target_not_sender: bool):
         for x in range(len(amount_phrases)):
             pattern = fr'(\S+\s+\S+)\s*({amount_phrases[x]})'
             matches = re.findall(pattern, body)
-            print(matches)
             if not matches:
                 print("No", amount_phrases[x], "found")
             else:
@@ -90,13 +85,31 @@ def parse_body(request_type, target_not_sender: bool):
                         amount['amount'] = matches[y][0].strip(f'{match} ')
                         amount['unit'] = matches[y][1]
         
-        if any((match := target) in body.split() for target in targets):
-            print(body.split().index(match))
+        if any((match := target) in body_words for target in targets):
+            target_index = body_words.index(match)
+            if match == "default":
+                amount['target'] = "default user" # add more options for default and for multiple users 
+            else:
+                username = body_words[target_index + 1]
+                amount['target'] = username
+        
+        elif amount['target'] == None:
+            for target in body_words:
+                if is_email(target):
+                    amount['target'] = target
+
+        elif not target_not_sender:
+            amount['target'] = None
+        print(target_not_sender)
+        print(amount)
 
     
-        pass
 
-    
+def execute_request(valid_request: bool, storage_request: bool, positive_verb: bool, negative_verb: bool, target_not_sender: bool):
+    if valid_request == False:
+        return "invalid request subject"
+    if storage_request == True:
+        parse_body("storage", target_not_sender)
 
     
 execute_request(*parse_subject(headers_dictionary))

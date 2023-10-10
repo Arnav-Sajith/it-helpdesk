@@ -4,8 +4,10 @@ storage space quota
 add more increase
 *verbs_negative*
 reduce decrease less
+*selftargets*
+my me myself
 *targets*
-employee employee: user user: default username username: 
+employee employee: user user: default username username: account account:
 *queries*
 how-much
 *modifiers*
