@@ -1,0 +1,11 @@
+*keywords*
+storage space quota
+*verbs_positive*
+add more increase
+*verbs_negative*
+reduce decrease less
+*targets*
+employee user default
+*queries*
+how-much
+
