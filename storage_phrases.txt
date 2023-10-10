@@ -5,7 +5,10 @@ add more increase
 *verbs_negative*
 reduce decrease less
 *targets*
-employee user default
+employee employee: user user: default username username: 
 *queries*
 how-much
-
+*modifiers*
+by to
+*amount*
+gb mb
