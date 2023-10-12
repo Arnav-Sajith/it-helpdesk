@@ -1,0 +1,37 @@
+- name: Increase Storage for User (Create text file)
+
+  hosts: windows_desktop
+
+  vars:
+
+    request_modifier: "{{ modifier }}"
+
+    request_amount: "{{ amount }}"
+
+    request_unit: "{{ unit }}"
+
+    request_target: "{{ target }}"
+
+    request_action: "{{ 'increase' if (positive_action|bool == True) else 'decrease'}}"
+
+    request_date: "{{ date }}"
+
+    destination: C:\Users\{{ ansible_user }}\Documents\
+
+  tasks:
+    - name: Navigate to directory
+      ansible.windows.win_shell: |
+        cd {{ destination }}
+        mkdir storage_requests
+        cd storage_requests
+
+
+    - name: Create file
+      ansible.windows.win_copy:
+        content: Please {{ request_action }} the storage quota for user {{ request_target }} {{ request_modifier }} {{ request_amount }} {{ request_unit }}
+        dest: .\storage_request_{{ date }}.txt
+      register: result
+
+    - name: Print out result
+      ansible.builtin.debug:
+        msg: result
