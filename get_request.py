@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from sys import stdin
 import re
-import unicodedata
+import parse_email as pe
+import ansible_runner
+
 important_headers =["From", "id", "To:", "Subject:", "Message-Id:", "Message-ID:", "References:", "Date:"] # need to fix for multiple references since each one is on a new line # also see if implementing isupper/islower is better 
 headers_dictionary = {}
 unimportant_headers = []
@@ -37,15 +39,12 @@ with open("/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/user_request_e
             add_to_dict("body", body)
             break
         header = email_contents[x].split(maxsplit=1)[0]
-        print(type(header), file=email_log)  
-        print(type(email_contents[x]), file=email_log)
         if header not in important_headers:
             unimportant_headers.append(email_contents[x])
             del(email_contents[x])
             x -= 1
         else:
             clean_value, clean_header = clean_value_header(header, email_contents[x])
-            print(type(clean_header), type(clean_value), file=email_log)
             add_to_dict(clean_header, clean_value)
             
         x += 1   
@@ -54,3 +53,11 @@ with open("/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/user_request_e
     for header in headers_dictionary:
         print(header, ": ", headers_dictionary[header], file=email_log)
     
+    parsed_subject = pe.parse_subject(headers_dictionary)
+    storage_request_contents = pe.execute_request(*parsed_subject)
+    storage_request_contents['date'] = headers_dictionary['date'].replace(" ", "_").replace(":", "_")
+    print(storage_request_contents, file=email_log)
+    runner_config = ansible_runner.config.runner.RunnerConfig(private_data_dir="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk", playbook="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/increase_storage.yaml", inventory = "/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/inventory.yaml", extravars = storage_request_contents)
+    runner_config.prepare()
+    rc = ansible_runner.runner.Runner(config=runner_config)
+    rc.run()

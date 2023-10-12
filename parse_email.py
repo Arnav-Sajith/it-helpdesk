@@ -1,13 +1,13 @@
 import re
 from pyisemail import is_email
-headers_dictionary = {}
-headers_dictionary['from'] = 'arnavsajith@arnav.local'
-headers_dictionary['id'] = 'F2670D23433'
-headers_dictionary['to'] = 'arnavsajith@arnav.local'
-headers_dictionary['subject'] = 'Increase user Storage'
-headers_dictionary['message-id'] = '20231010040739.F2670D23433@arnav.local'
-headers_dictionary['date'] = 'Tue 10 Oct 2023 00:07:39 -0400 (EDT)'
-headers_dictionary['body'] = '''Hello, I'd like to increase the storage quota for user: arnavsajith@arnav.local to 5.5gb'''
+# headers_dictionary = {}
+# headers_dictionary['from'] = 'arnavsajith@arnav.local'
+# headers_dictionary['id'] = 'F2670D23433'
+# headers_dictionary['to'] = 'arnavsajith@arnav.local'
+# headers_dictionary['subject'] = 'Increase user Storage'
+# headers_dictionary['message-id'] = '20231010040739.F2670D23433@arnav.local'
+# headers_dictionary['date'] = 'Tue 10 Oct 2023 00:07:39 -0400 (EDT)'
+# headers_dictionary['body'] = '''Hello, I'd like to increase the storage quota for user: arnavsajith@arnav.local to 5.5 gb'''
 
 storage_phrases_dict = {}
 
@@ -21,11 +21,11 @@ def is_valid_amount(amount: str):
             return False
 
 def load_phrases():
-    with open("storage_phrases.txt", ) as storage_phrases:
+    with open("storage_phrases.txt", "r") as storage_phrases:
         key = None  # store the most recent "command" here
         for line in storage_phrases.readlines():
             if line[0] == '*':
-                key = line[1:].rstrip("*\n") # your "command"
+                key = line.strip("*\n") # your "command"
                 storage_phrases_dict[key] = []
             else:
                 storage_phrases_dict[key].append(line.split())
@@ -59,10 +59,10 @@ def parse_subject(headers_dictionary):
         valid_request = False
         return valid_request
     else:
-        return valid_request, storage_request, positive_verb, negative_verb, target_not_sender
+        return valid_request, storage_request, positive_verb, negative_verb, target_not_sender, headers_dictionary
 
 
-def parse_body(request_type, target_not_sender: bool):
+def parse_body(request_type: str, target_not_sender: bool, headers_dictionary: dict):
     print(target_not_sender)
     body = headers_dictionary['body'].lower()
     body_words = body.split()
@@ -85,31 +85,29 @@ def parse_body(request_type, target_not_sender: bool):
                         amount['amount'] = matches[y][0].strip(f'{match} ')
                         amount['unit'] = matches[y][1]
         
-        if any((match := target) in body_words for target in targets):
+        if any((match := target) in body_words for target in targets): # add more options for default and for multiple users
             target_index = body_words.index(match)
-            if match == "default":
-                amount['target'] = "default user" # add more options for default and for multiple users 
-            else:
-                username = body_words[target_index + 1]
-                amount['target'] = username
-        
-        elif amount['target'] == None:
+            username = body_words[target_index + 1]
+            amount['target'] = "default user" if match == "default" else username
+
+        elif amount['target'] is None:
             for target in body_words:
-                if is_email(target):
-                    amount['target'] = target
+                    amount['target'] = target if is_email(target) else None
 
         elif not target_not_sender:
             amount['target'] = None
-        print(target_not_sender)
-        print(amount)
+    return amount
 
     
-
-def execute_request(valid_request: bool, storage_request: bool, positive_verb: bool, negative_verb: bool, target_not_sender: bool):
-    if valid_request == False:
+def execute_request(valid_request: bool, storage_request: bool, positive_verb: bool, negative_verb: bool, target_not_sender: bool, headers_dictionary: dict):
+    if valid_request is False:
         return "invalid request subject"
-    if storage_request == True:
-        parse_body("storage", target_not_sender)
+    if storage_request is True:
+        storage_request_contents = parse_body("storage", target_not_sender, headers_dictionary)
+        storage_request_contents['target'] = headers_dictionary['from'] if storage_request_contents['target'] is None else storage_request_contents['target']
+        storage_request_contents['positive_action'] = positive_verb if positive_verb else negative_verb
+        print(storage_request_contents)
+        return storage_request_contents
 
-    
-execute_request(*parse_subject(headers_dictionary))
+
+# request = execute_request(*parse_subject(headers_dictionary))

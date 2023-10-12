@@ -13,4 +13,4 @@ how-much
 *modifiers*
 by to
 *amount*
-gb mb
+gb
