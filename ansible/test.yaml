@@ -1,0 +1,13 @@
+- hosts: localhost
+  tasks:
+    - name: Send
+      community.general.mail:
+              host: smtp.gmail.com
+              port: 587
+              secure: starttls
+              username: vanrahtijas@gmail.com
+              password: 
+              to: 'arnavsajith04@gmail.com'
+              from: vanrahtijas@gmail.com
+              subject: "Here is the result of your command"
+              body: "hello"

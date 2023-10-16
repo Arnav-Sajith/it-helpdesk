@@ -16,22 +16,21 @@
 
     request_date: "{{ date }}"
 
-    destination: C:\Users\{{ ansible_user }}\Documents\
+    destination: C:\Users\{{ ansible_user }}\Documents
 
   tasks:
-    - name: Navigate to directory
-      ansible.windows.win_shell: |
-        cd {{ destination }}
-        mkdir storage_requests
-        cd storage_requests
+    # - name: Navigate to directory
+    #   ansible.windows.win_shell: |
+    #     cd {{ destination }}
+    #     mkdir storage_requests
 
 
     - name: Create file
       ansible.windows.win_copy:
         content: Please {{ request_action }} the storage quota for user {{ request_target }} {{ request_modifier }} {{ request_amount }} {{ request_unit }}
-        dest: .\storage_request_{{ date }}.txt
+        dest: '{{destination}}\storage_requests\storage_request_{{ date }}.txt'
       register: result
 
-    - name: Print out result
+    - name: Print out
       ansible.builtin.debug:
-        msg: result
+        msg: '{{ result }}'

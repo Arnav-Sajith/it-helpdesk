@@ -91,7 +91,7 @@ mail_owner = _postfix
 # from gethostname(). $myhostname is used as a default value for many
 # other configuration parameters.
 #
-myhostname = arnav.local
+myhostname = mail.google.com
 #myhostname = arnav.local
 
 # The mydomain parameter specifies the local internet domain name.
@@ -686,16 +686,29 @@ recipient_delimiter = +
 tls_random_source = dev:/dev/urandom
 smtpd_tls_ciphers = medium
 
-inet_interfaces = loopback-only
 
-smtpd_restriction_classes = mua_sender_restrictions, mua_client_restrictions, mua_helo_restrictions
+#smtpd_restriction_classes = mua_sender_restrictions, mua_client_restrictions, mua_helo_restrictions
 
-mua_client_restrictions = permit_sasl_authenticated, reject
+#mua_client_restrictions = permit_sasl_authenticated, reject
 
-mua_sender_restrictions = permit_sasl_authenticated, reject
+#mua_sender_restrictions = permit_sasl_authenticated, reject
 
-mua_helo_restrictions = permit_mynetworks, reject_non_fqdn_hostname, reject_invalid_hostname, permit
+#mua_helo_restrictions = permit_mynetworks, reject_non_fqdn_hostname, reject_invalid_hostname, permit
 
  ...
 transport_maps = hash:/etc/postfix/transport
 virtual_alias_maps = hash:/etc/postfix/virtual
+# Postfix as relay
+#
+#Gmail SMTP
+relayhost=smtp.gmail.com:587
+
+# Enable SASL authentication in the Postfix SMTP client.
+smtp_sasl_auth_enable=yes
+smtp_sasl_password_maps=hash:/etc/postfix/sasl_passwd
+smtp_sasl_security_options=noanonymous
+smtp_sasl_mechanism_filter=plain
+# Enable Transport Layer Security (TLS), i.e. SSL.
+smtp_use_tls=yes
+smtp_tls_security_level=encrypt
+tls_random_source=dev:/dev/urandom

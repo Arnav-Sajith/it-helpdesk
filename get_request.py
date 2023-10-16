@@ -4,7 +4,7 @@ import re
 import parse_email as pe
 import ansible_runner
 
-important_headers =["From", "id", "To:", "Subject:", "Message-Id:", "Message-ID:", "References:", "Date:"] # need to fix for multiple references since each one is on a new line # also see if implementing isupper/islower is better 
+important_headers =["From:", "id", "To:", "Subject:", "Message-Id:", "Message-ID:", "References:", "Date:", "X-Google-Original-From:"] # need to fix for multiple references since each one is on a new line # also see if implementing isupper/islower is better 
 headers_dictionary = {}
 unimportant_headers = []
 email_contents = []
@@ -31,7 +31,7 @@ with open("/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/user_request_e
         print(line.strip(), file=email_log)
         email_contents.append(line)
     print("\n\n", file=email_log)
-    x = 0
+    x = 1
     while x <= len(email_contents):
         if email_contents[x] == "\n":
             del(email_contents[x])
@@ -45,19 +45,23 @@ with open("/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/user_request_e
             x -= 1
         else:
             clean_value, clean_header = clean_value_header(header, email_contents[x])
-            add_to_dict(clean_header, clean_value)
-            
+            headers_dictionary = add_to_dict(clean_header, clean_value)
         x += 1   
 
 
     for header in headers_dictionary:
-        print(header, ": ", headers_dictionary[header], file=email_log)
+        print(headers_dictionary[header])
     
-    parsed_subject = pe.parse_subject(headers_dictionary)
-    storage_request_contents = pe.execute_request(*parsed_subject)
-    storage_request_contents['date'] = headers_dictionary['date'].replace(" ", "_").replace(":", "_")
-    print(storage_request_contents, file=email_log)
-    runner_config = ansible_runner.config.runner.RunnerConfig(private_data_dir="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk", playbook="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/increase_storage.yaml", inventory = "/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/inventory.yaml", extravars = storage_request_contents)
+    # parsed_subject = pe.parse_subject(headers_dictionary)
+    headers_dictionary['date'] = headers_dictionary['date'].replace(" ", "_").replace(":", "_")
+    runner_config = ansible_runner.config.runner.RunnerConfig(private_data_dir="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk", playbook="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/email_shell.yaml", inventory = "/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/inventory.yaml", extravars = headers_dictionary)
     runner_config.prepare()
     rc = ansible_runner.runner.Runner(config=runner_config)
     rc.run()
+    # storage_request_contents = pe.execute_request(*parsed_subject)
+    # storage_request_contents['date'] = headers_dictionary['date'].replace(" ", "_").replace(":", "_")
+    # print(storage_request_contents, file=email_log)
+    # runner_config = ansible_runner.config.runner.RunnerConfig(private_data_dir="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk", playbook="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/increase_storage.yaml", inventory = "/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/inventory.yaml", extravars = storage_request_contents)
+    # runner_config.prepare()
+    # rc = ansible_runner.runner.Runner(config=runner_config)
+    # rc.run()

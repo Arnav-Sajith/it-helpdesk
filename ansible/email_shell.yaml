@@ -1,0 +1,48 @@
+- name: Email value of requested windows shell script
+  hosts: windows_desktop
+  vars:
+    command: '{{ body }}'
+    email: '{{ X-Google-Original-From }}'
+    date_entered: '{{ date }}'
+  #   pkg:
+  #     - postfix
+  #   svc: postfix
+
+  tasks:
+    - name: Send reply
+      ansible.windows.win_command: '{{ body }}'
+      register: out
+    - name: Create reply email
+      ansible.builtin.lineinfile:
+        path: /Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/reply_emails/reply_email.txt
+        create: true
+        state: present
+        line: "To: {{ email }}"
+      delegate_to: localhost
+
+    - name: Create reply subject
+      ansible.builtin.lineinfile:
+        path: /Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/reply_emails/reply_email.txt
+        state: present
+        line: "Subject: Here is the result of your command '{{ body }}'"
+      delegate_to: localhost
+    - name: Create reply body
+      ansible.builtin.blockinfile:
+        path: /Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/reply_emails/reply_email.txt
+        block: '{{ out.stdout_lines }}'
+        marker: ''
+      delegate_to: localhost
+
+    - name: Run shell
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 587
+        secure: starttls
+        username: vanrahtijas@gmail.com
+        password: 
+        to: '{{ email }}'
+        from: vanrahtijas@gmail.com
+        subject: "Here is the result of your command '{{ command }}'"
+        body: "{{ out.stdout_lines }}"
+      delegate_to: localhost
+

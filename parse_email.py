@@ -1,4 +1,5 @@
 import re
+import sys
 from pyisemail import is_email
 # headers_dictionary = {}
 # headers_dictionary['from'] = 'arnavsajith@arnav.local'
@@ -39,7 +40,6 @@ def parse_subject(headers_dictionary):
     negative_verb = False
     target_not_sender = False
     valid_request = True
-
     storage_phrases = load_phrases()
     subject = headers_dictionary['subject'].lower()
     if any(keyword in subject for keyword in storage_phrases['keywords'][0]):

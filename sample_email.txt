@@ -1,4 +1,4 @@
 From: arnavsajith@arnav.local
-To: arnavsajith@arnav.local
-Subject: Increase quota
-Hello, I'd like to decrease the storage quota for user: arnavsajith@arnav.local by 9.3 GB please.
+To: vanrahtijas@gmail.com
+Subject: decrease quota
+systeminfo
