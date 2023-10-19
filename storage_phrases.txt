@@ -12,5 +12,3 @@ employee employee: user user: default username username: account account:
 how-much
 *modifiers*
 by to
-*amount*
-gb

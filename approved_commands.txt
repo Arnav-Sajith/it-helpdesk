@@ -1,0 +1,6 @@
+systeminfo
+ver
+dir
+tree
+ipconfig
+driverquery

@@ -16,6 +16,8 @@
 
     request_date: "{{ date }}"
 
+    request_from: "{{ from }}"
+
     destination: C:\Users\{{ ansible_user }}\Documents
 
   tasks:
@@ -34,3 +36,17 @@
     - name: Print out
       ansible.builtin.debug:
         msg: '{{ result }}'
+    - name: Send confirmation Email
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 465
+        secure: always
+        username: vanrahtijas@gmail.com
+        # trunk-ignore(checkov/CKV_SECRET_6)
+        password: 
+        to: '{{ [ request_target ,  request_from ] | unique }}'
+
+        from: vanrahtijas@gmail.com
+        subject: "Confirmation of {{ request_action }} storage request for user {{ request_target }}"
+        body: "The storage quota for user {{ request_target }} has been {{request_action}}ed {{ request_modifier }} {{ request_amount }} {{ request_unit }}"
+      delegate_to: localhost

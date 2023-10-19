@@ -3,6 +3,8 @@ from sys import stdin
 import re
 import parse_email as pe
 import ansible_runner
+from pyisemail import is_email
+
 
 important_headers =["From:", "id", "To:", "Subject:", "Message-Id:", "Message-ID:", "References:", "Date:", "X-Google-Original-From:"] # need to fix for multiple references since each one is on a new line # also see if implementing isupper/islower is better 
 headers_dictionary = {}
@@ -17,6 +19,9 @@ def clean_value_header(header: str, email_content_line: str):
     header_clean = header.lower().strip(":")
     if header_clean == "date" or header_clean == 'subject':
         return value_clean, header_clean
+    elif header_clean == "x-google-original-from":
+        value_clean = value_clean.split()
+        return value_clean[3], header_clean
     else:
         return value_clean.split()[0], header_clean.lstrip()
 
@@ -45,15 +50,17 @@ with open("/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/user_request_e
             x -= 1
         else:
             clean_value, clean_header = clean_value_header(header, email_contents[x])
+            print(clean_header, clean_value, file=email_log)
             headers_dictionary = add_to_dict(clean_header, clean_value)
         x += 1   
 
 
     for header in headers_dictionary:
-        print(headers_dictionary[header])
+        print(headers_dictionary, file=email_log)
     
     # parsed_subject = pe.parse_subject(headers_dictionary)
     headers_dictionary['date'] = headers_dictionary['date'].replace(" ", "_").replace(":", "_")
+    headers_dictionary['from'] = 'me@svmhdvn.name'
     runner_config = ansible_runner.config.runner.RunnerConfig(private_data_dir="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk", playbook="/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/email_shell.yaml", inventory = "/Users/arnavsajith/Documents/Projects/EMPT/it-helpdesk/ansible/inventory.yaml", extravars = headers_dictionary)
     runner_config.prepare()
     rc = ansible_runner.runner.Runner(config=runner_config)

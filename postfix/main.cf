@@ -99,7 +99,9 @@ myhostname = mail.google.com
 # $mydomain is used as a default value for many other configuration
 # parameters.
 #
-mydomain = arnav.local
+#mydomain = arnav.local
+mydomain = mail.google.com
+
 
 # SENDING MAIL
 # 
@@ -686,14 +688,15 @@ recipient_delimiter = +
 tls_random_source = dev:/dev/urandom
 smtpd_tls_ciphers = medium
 
+inet_interfaces = all
 
-#smtpd_restriction_classes = mua_sender_restrictions, mua_client_restrictions, mua_helo_restrictions
+3smtpd_restriction_classes = mua_sender_restrictions, mua_client_restrictions, mua_helo_restrictions
 
-#mua_client_restrictions = permit_sasl_authenticated, reject
+mua_client_restrictions = permit_sasl_authenticated, reject
 
-#mua_sender_restrictions = permit_sasl_authenticated, reject
+mua_sender_restrictions = permit_sasl_authenticated, reject
 
-#mua_helo_restrictions = permit_mynetworks, reject_non_fqdn_hostname, reject_invalid_hostname, permit
+mua_helo_restrictions = permit_mynetworks, reject_non_fqdn_hostname, reject_invalid_hostname, permit
 
  ...
 transport_maps = hash:/etc/postfix/transport

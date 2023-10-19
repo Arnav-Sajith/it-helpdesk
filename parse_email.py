@@ -30,60 +30,43 @@ def load_phrases():
                 storage_phrases_dict[key] = []
             else:
                 storage_phrases_dict[key].append(line.split())
-    print(storage_phrases_dict)
     return storage_phrases_dict
 
     
-def parse_subject(headers_dictionary):
-    storage_request = False
-    positive_verb = False
-    negative_verb = False
-    target_not_sender = False
-    valid_request = True
+def parse_subject(subject_entered : str, email_from : str, body : str):
+    subject = subject_entered.lower()
+    parse_subject_dict = {'storage_request': False, 'positive_verb': False, 'negative_verb': False, 'target_not_sender': False, 'valid_request': True, 'email': email_from, 'body': body}
     storage_phrases = load_phrases()
-    subject = headers_dictionary['subject'].lower()
+    print(storage_phrases["verbs_positive"][0])
     if any(keyword in subject for keyword in storage_phrases['keywords'][0]):
-        storage_request = True
-        print("Request = storage_request")
-    if any((match := positive_verb) in subject for positive_verb in storage_phrases["verbs_positive"][0]):
-        positive_verb = True
-        print("Request type = positive verb", match)
-    if any((match := negative_verb) in subject for negative_verb in storage_phrases["verbs_negative"][0]):
-        negative_verb = True
-        print("Request type = negative verb", match)
-    if any((match := target) in subject for target in storage_phrases["targets"][0]) and not any(self_target in subject for self_target in storage_phrases["selftargets"][0]):
-        target_not_sender = True
-        print("target found:", match)
-    if (positive_verb and negative_verb):
-        print("Sorry, I couldn't comprehend your request. The subject contains both a positive: '", positive_verb, "' and a negative '", negative_verb, "'")
-        valid_request = False
-        return valid_request
-    else:
-        return valid_request, storage_request, positive_verb, negative_verb, target_not_sender, headers_dictionary
+        parse_subject_dict['storage_request'] = True
+    if any(positive_verb in subject for positive_verb in storage_phrases["verbs_positive"][0]):
+        parse_subject_dict['positive_verb'] = True
+    if any(negative_verb in subject for negative_verb in storage_phrases["verbs_negative"][0]):
+        parse_subject_dict['negative_verb'] = True
+    if any(target in subject for target in storage_phrases["targets"][0]) and not any(self_target in subject for self_target in storage_phrases["selftargets"][0]):
+        parse_subject_dict['target_not_sender'] = True
+    # if (positive_verb and negative_verb):
+    #     print("Sorry, I couldn't comprehend your request. The subject contains both a positive: '", positive_verb, "' and a negative '", negative_verb, "'")
+    #     valid_request = False
+    #     return valid_request
+    return parse_subject_dict
 
 
-def parse_body(request_type: str, target_not_sender: bool, headers_dictionary: dict):
-    print(target_not_sender)
-    body = headers_dictionary['body'].lower()
+def parse_body(request_type: str, target_not_sender: bool, body: str):
     body_words = body.split()
     amount = {"modifier": None, "amount": None, "unit": None, "target": None}
     if request_type == "storage":
         storage_phrases = load_phrases()
-        amount_phrases = storage_phrases["amount"][0]
         modifiers = storage_phrases["modifiers"][0]
         targets = storage_phrases["targets"][0]
-        print("\n\n")
-        for x in range(len(amount_phrases)):
-            pattern = fr'(\S+\s+\S+)\s*({amount_phrases[x]})'
-            matches = re.findall(pattern, body)
-            if not matches:
-                print("No", amount_phrases[x], "found")
-            else:
-                for y in range(len(matches)):
-                    if any((match := modifier) in matches[y][0] for modifier in modifiers) and is_valid_amount(matches[y][0].strip(match)):                    
-                        amount["modifier"] = match
-                        amount['amount'] = matches[y][0].strip(f'{match} ')
-                        amount['unit'] = matches[y][1]
+        pattern = r'(\S+\s+\S+)\s*(GB)'
+        matches = re.findall(pattern, body, re.IGNORECASE)
+        print(matches)
+        if any((match := modifier) in matches[0][0] for modifier in modifiers) and is_valid_amount(matches[0][0].strip(match)):
+                    amount["modifier"] = match
+                    amount['amount'] = matches[0][0].strip(f'{match} ')
+                    amount['unit'] = matches[0][1]
         
         if any((match := target) in body_words for target in targets): # add more options for default and for multiple users
             target_index = body_words.index(match)
@@ -99,15 +82,15 @@ def parse_body(request_type: str, target_not_sender: bool, headers_dictionary: d
     return amount
 
     
-def execute_request(valid_request: bool, storage_request: bool, positive_verb: bool, negative_verb: bool, target_not_sender: bool, headers_dictionary: dict):
-    if valid_request is False:
+def execute_request(parse_subject_dict : dict):
+    if parse_subject_dict['valid_request'] is False:
         return "invalid request subject"
-    if storage_request is True:
-        storage_request_contents = parse_body("storage", target_not_sender, headers_dictionary)
-        storage_request_contents['target'] = headers_dictionary['from'] if storage_request_contents['target'] is None else storage_request_contents['target']
-        storage_request_contents['positive_action'] = positive_verb if positive_verb else negative_verb
-        print(storage_request_contents)
+    if parse_subject_dict['storage_request'] is True:
+        storage_request_contents = parse_body("storage", parse_subject_dict['target_not_sender'], parse_subject_dict['body'])
+        storage_request_contents['target'] = parse_subject_dict['email'] if storage_request_contents['target'] is None else storage_request_contents['target']
+        storage_request_contents['positive_action'] = parse_subject_dict['positive_verb'] if parse_subject_dict['positive_verb'] else parse_subject_dict['negative_verb']
         return storage_request_contents
 
-
-# request = execute_request(*parse_subject(headers_dictionary))
+# dic = {'storage_request': True, 'positive_verb': False, 'negative_verb': False, 'target_not_sender': False, 'valid_request': True, 'email': 'vanrahtijas@gmail.com', 'body': "Hello, I'd like to increase my storage quota by 9.3 GB please."}
+# x = execute_request(dic)
+# print(x)
