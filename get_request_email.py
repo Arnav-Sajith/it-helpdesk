@@ -1,10 +1,12 @@
 from sys import stdin
 import email
-from email.parser import Parser
 from email.policy import default
 from email.utils import parseaddr
 import parse_email as pe
 from run_playbook import ansible_run
+
+
+
 
 def main():
     email_msg = email.message_from_file(stdin, policy=default)
@@ -16,7 +18,6 @@ def main():
     request_type = parsed_subject['request_type']
     storage_request_contents = pe.execute_request(parsed_subject)
     storage_request_contents['from'] = address
-
     ansible_run(request_type, storage_request_contents)
   
 

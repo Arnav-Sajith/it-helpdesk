@@ -1,0 +1,10 @@
+*current_users*
+arnavsajith
+bob
+dan
+eve
+joe
+smith
+alice
+john
+*last_line_must_be_newline*

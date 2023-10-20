@@ -9,6 +9,6 @@ my me myself
 *targets*
 employee employee: user user: default username username: account account:
 *queries*
-how-much
+'how much' left 'what is' 'have i' 'query'
 *modifiers*
 by to
