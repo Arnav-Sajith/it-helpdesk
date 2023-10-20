@@ -1,16 +1,6 @@
 import re
-import sys
 from pyisemail import is_email
-# headers_dictionary = {}
-# headers_dictionary['from'] = 'arnavsajith@arnav.local'
-# headers_dictionary['id'] = 'F2670D23433'
-# headers_dictionary['to'] = 'arnavsajith@arnav.local'
-# headers_dictionary['subject'] = 'Increase user Storage'
-# headers_dictionary['message-id'] = '20231010040739.F2670D23433@arnav.local'
-# headers_dictionary['date'] = 'Tue 10 Oct 2023 00:07:39 -0400 (EDT)'
-# headers_dictionary['body'] = '''Hello, I'd like to increase the storage quota for user: arnavsajith@arnav.local to 5.5 gb'''
 
-storage_phrases_dict = {}
 
 def is_valid_amount(amount: str):
     if amount.isdigit():
@@ -23,6 +13,7 @@ def is_valid_amount(amount: str):
 
 def load_phrases():
     with open("storage_phrases.txt", "r") as storage_phrases:
+        storage_phrases_dict = {}
         key = None  # store the most recent "command" here
         for line in storage_phrases.readlines():
             if line[0] == '*':
@@ -35,11 +26,11 @@ def load_phrases():
     
 def parse_subject(subject_entered : str, email_from : str, body : str):
     subject = subject_entered.lower()
-    parse_subject_dict = {'storage_request': False, 'positive_verb': False, 'negative_verb': False, 'target_not_sender': False, 'valid_request': True, 'email': email_from, 'body': body}
+    parse_subject_dict = {'request_type': 1, 'positive_verb': False, 'negative_verb': False, 'target_not_sender': False, 'valid_request': True, 'email': email_from, 'body': body}
     storage_phrases = load_phrases()
     print(storage_phrases["verbs_positive"][0])
     if any(keyword in subject for keyword in storage_phrases['keywords'][0]):
-        parse_subject_dict['storage_request'] = True
+        parse_subject_dict['request_type'] = 1
     if any(positive_verb in subject for positive_verb in storage_phrases["verbs_positive"][0]):
         parse_subject_dict['positive_verb'] = True
     if any(negative_verb in subject for negative_verb in storage_phrases["verbs_negative"][0]):
@@ -53,10 +44,10 @@ def parse_subject(subject_entered : str, email_from : str, body : str):
     return parse_subject_dict
 
 
-def parse_body(request_type: str, target_not_sender: bool, body: str):
+def parse_body(request_type: int, target_not_sender: bool, body: str):
     body_words = body.split()
     amount = {"modifier": None, "amount": None, "unit": None, "target": None}
-    if request_type == "storage":
+    if request_type == 1:
         storage_phrases = load_phrases()
         modifiers = storage_phrases["modifiers"][0]
         targets = storage_phrases["targets"][0]
@@ -85,12 +76,8 @@ def parse_body(request_type: str, target_not_sender: bool, body: str):
 def execute_request(parse_subject_dict : dict):
     if parse_subject_dict['valid_request'] is False:
         return "invalid request subject"
-    if parse_subject_dict['storage_request'] is True:
-        storage_request_contents = parse_body("storage", parse_subject_dict['target_not_sender'], parse_subject_dict['body'])
+    if parse_subject_dict['request_type'] == 1:
+        storage_request_contents = parse_body(1, parse_subject_dict['target_not_sender'], parse_subject_dict['body'])
         storage_request_contents['target'] = parse_subject_dict['email'] if storage_request_contents['target'] is None else storage_request_contents['target']
-        storage_request_contents['positive_action'] = parse_subject_dict['positive_verb'] if parse_subject_dict['positive_verb'] else parse_subject_dict['negative_verb']
+        storage_request_contents['positive_action'] = parse_subject_dict['positive_verb']
         return storage_request_contents
-
-# dic = {'storage_request': True, 'positive_verb': False, 'negative_verb': False, 'target_not_sender': False, 'valid_request': True, 'email': 'vanrahtijas@gmail.com', 'body': "Hello, I'd like to increase my storage quota by 9.3 GB please."}
-# x = execute_request(dic)
-# print(x)
