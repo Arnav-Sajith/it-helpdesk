@@ -1,7 +1,7 @@
 *targets*
-employee employee: user user: default username username: account account:
+employee employee: user user: default username username: account:
 *selftargets*
-my me myself
+my me myself i
 *verbs_positive*
 add more increase
 *verbs_negative*

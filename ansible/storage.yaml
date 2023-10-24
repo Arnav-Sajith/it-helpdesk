@@ -5,17 +5,17 @@
   vars:
     ansible_user: arnav
 
-    query_request: "{{ query }}"
+    query_request: "{{ queries }}"
 
-    request_modifier: "{{ modifier }}"
+    request_modifier: "{{ modifiers }}"
 
     request_amount: "{{ amount | float}}"
 
     request_unit: "gb"
 
-    request_target: "{{ target }}"
+    request_target: "{{ targets }}"
 
-    request_action: "{{ 'increase' if (positive_action|bool == True) else 'decrease'}}"
+    request_action: "{{ 'increase' if (verbs_positive|bool == True) else 'decrease'}}"
 
     request_from: "{{ from }}"
 

@@ -1,0 +1,25 @@
+- name: Invalid request
+
+  hosts: localhost
+
+  vars:
+
+    invalid_target: '{{ valid_target }}'
+    request_from: '{{ from }}'
+
+  vars_files:
+    - vars/credentials.yaml
+
+  tasks:
+    - name: Invalid target
+      community.general.mail:
+        host: smtp.gmail.com
+        port: 465
+        secure: always
+        username: '{{ smtp_email }}'
+        password: '{{ smtp_password }}'
+        to: '{{ request_from }}'
+        from: '{{ smtp_email }}'
+        subject: "Invalid target for your last storage request"
+        body: "I'm sorry, but there wasn't a valid user in your request. They might not exist in this organization. Please check your spelling and/or read the documentation on how to use the storage request tool."
+      when: not invalid_target

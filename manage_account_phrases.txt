@@ -6,7 +6,3 @@ my me myself 'my account'
 username  
 *password*
 password
-*permissions*
-'give access' 'remove access' allow permission permissions 'add to' 
-*information*
-details how when what
