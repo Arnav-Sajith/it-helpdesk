@@ -1,0 +1,10 @@
+*targets*
+employee: user: default username: account:
+*selftargets*
+my me myself 'my account'
+*settings*
+password username name reset
+*permissions*
+'give access' 'remove access' allow permission permissions 'add to' 
+*information*
+details how when what

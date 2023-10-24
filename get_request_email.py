@@ -14,6 +14,8 @@ def main():
     address = address[1] if address[1] else address[0]
     body = email_msg.get_body(('plain',)).get_content().strip("\n")
 
+    
+
     parsed_subject = pe.parse_subject(email_msg['subject'], address, body)
     request_type = parsed_subject['request_type']
     storage_request_contents = pe.execute_request(parsed_subject)

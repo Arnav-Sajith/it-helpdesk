@@ -1,14 +1,17 @@
-*keywords*
-storage space quota
+*targets*
+employee employee: user user: default username username: account account:
+*selftargets*
+my me myself
 *verbs_positive*
 add more increase
 *verbs_negative*
 reduce decrease less
-*selftargets*
-my me myself
-*targets*
-employee employee: user user: default username username: account account:
 *queries*
 'how much' left 'what is' 'have i' 'query'
 *modifiers*
 by to
+*unit*
+gb
+# when creating a phrasebook, ensure that the targets and self-targets keywords are at the top. Also, if anything involves an amount, like increasing storage by an amount, or changing any value by/to a number, be sure to include the modifiers and unit
+# only include 1 unit
+# after every line, make sure there is no space/other characters
