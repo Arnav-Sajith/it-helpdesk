@@ -4,5 +4,5 @@ storage space quota
 username permissions password 'change username' 
 *query_account*
 'query account'
-*management*
-new 'new user' 'new employee' onboarding
+*manage_users*
+new 'new user' 'new employee' onboarding delete 'delete user' remove 'add user'

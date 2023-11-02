@@ -1,0 +1,7 @@
+*targets*
+username: password: 'first name:' 'last name:'
+*selftargets*
+*verbs_positive*
+new create add 
+*verbs_negative*
+delete remove

@@ -20,6 +20,6 @@
         password: '{{ smtp_password }}'
         to: '{{ request_from }}'
         from: '{{ smtp_email }}'
-        subject: "Invalid target for your last storage request"
+        subject: "Invalid target for your last request"
         body: "I'm sorry, but there wasn't a valid user in your request. They might not exist in this organization. Please check your spelling and/or read the documentation on how to use the storage request tool."
       when: not invalid_target

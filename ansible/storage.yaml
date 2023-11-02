@@ -69,17 +69,3 @@
         body: "Your account has a quota (maximum space) of {{ ansible_zfs_datasets[0].quota }}, of which {{ ansible_zfs_datasets[0].reservation }} is already reserved. You have used {{ ansible_zfs_datasets[0].used }} so far."
       when: (query_request and target_valid) | bool
       delegate_to: localhost
-
-    - name: Invalid target
-      community.general.mail:
-        host: smtp.gmail.com
-        port: 465
-        secure: always
-        username: '{{ smtp_email }}'
-        password: '{{ smtp_password }}'
-        to: '{{ [ request_target ,  request_from ] | unique }}'
-        from: '{{ smtp_email }}'
-        subject: "Invalid target for your last storage request"
-        body: "I'm sorry, but the user {{ target }} does not exist in this organization. Please check your spelling and/or read the documentation on how to use the storage request tool."
-      when: not target_valid
-      delegate_to: localhost
