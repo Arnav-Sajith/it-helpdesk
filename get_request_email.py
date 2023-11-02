@@ -36,13 +36,13 @@ def main():
 
         parsed_subject = pe.parse_subject_universal(email_msg['subject'], address, body)
         parsed_body = pe.parse_body_universal(parsed_subject)
-        print(parsed_body)
         request_contents = pe.execute_request_universal(parsed_body)
         request_contents['from'] = address
-        # if not request_contents['valid_target']:
-        #     ansible_run(0, request_contents)
-        # else:
-        #     ansible_run(request_contents['request_type'], request_contents)
+        print(request_contents)
+        if not request_contents['valid_target']:
+            ansible_run(0, request_contents)
+        else:
+            ansible_run(request_contents['request_type'], request_contents)
     
 
     

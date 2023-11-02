@@ -3,7 +3,7 @@
   vars:
     command: '{{ body }}'
     email: '{{ from }}'
-    date_entered: '{{ date }}'
+
   tasks:
     - name: Run shell
       ansible.windows.win_command: '{{ command }}'
@@ -15,7 +15,7 @@
         port: 465
         secure: always
         username: vanrahtijas@gmail.com
-        password: ''
+        password: xlyvfrrpqbmlrndr
         to: '{{ email }}'
         from: vanrahtijas@gmail.com
         subject: "Here is the result of your command '{{ command }}'"

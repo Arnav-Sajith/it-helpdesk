@@ -12,8 +12,8 @@ X-Google-Original-From: arnavsajith@arnav.local
 Received: by mail.google.com (Postfix, from userid 501)
 	id 9B045DF2ED7; Thu, 12 Oct 2023 21:21:48 -0400 (EDT)
 To: vanrahtijas@gmail.com
-Subject: add user
+Subject: delete user
 Message-Id: <20231013012148.9B045DF2ED7@mail.google.com>
 Date: Thu, 12 Oct 2023 21:21:48 -0400 (EDT)
 
-Hello, I'd like to add a new user with  username: john3 and password: dickballs123 and first name: john and last name: test2
+Hello, I'd like to delete the user with the username: arnavsajith

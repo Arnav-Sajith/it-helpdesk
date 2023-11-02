@@ -30,7 +30,7 @@ def is_valid_amount(amount: str):
         
 def is_valid_target(target : str, request: dict):
     vars = load_vars(f"{request_type_lookup[request['request_type']]}")
-
+    needs_user_validation = True
     for section in vars:
         if 'needs_user_validation' in vars[section] and request[section]:
             needs_user_validation = strtobool(vars[section]['needs_user_validation'])
@@ -117,7 +117,7 @@ def parse_body_universal(parsed_subject_dict: dict):
             else:
                 target_index = body_words.index(match)
                 target_value = body_words[target_index + 1]
-                parse_body_dict[match] = target_value
+                parse_body_dict[match.strip(':')] = target_value
                 del body_words[target_index]
 
         else:
@@ -126,12 +126,6 @@ def parse_body_universal(parsed_subject_dict: dict):
                 parse_body_dict['selftargets'] = True
             break
 
-    if parse_body_dict['targets']:
-        print("targets is true", parse_body_dict['targets'])
-    else:
-        print("targets is false", parse_body_dict['targets'])
-
-    
     del parse_body_dict['phrases'], parse_body_dict['email'], parse_body_dict['body'], parse_body_dict['selftargets']
     return parse_body_dict
 

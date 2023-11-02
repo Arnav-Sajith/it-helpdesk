@@ -1,5 +1,5 @@
 *targets*
-username: password: 'first name:' 'last name:'
+username: password: first_name: last_name:
 *selftargets*
 *verbs_positive*
 new create add 
