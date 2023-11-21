@@ -10,6 +10,7 @@
   vars_files:
     - vars/credentials.yaml
 
+  
   tasks:
     - name: Invalid target
       community.general.mail:

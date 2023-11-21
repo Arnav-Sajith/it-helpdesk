@@ -1,14 +1,41 @@
 - hosts: jailhost
+  become: true
+  become_method: community.general.doas
+  remote_user: ansible
   vars:
-      ansible_user: arnav
-      request_amount: '{{ amount | float }}'
-      current_quota: '{{ (ansible_zfs_datasets[0].quota | replace("G", "")) | float}}'
-      increase_amount: '{{(current_quota|float + request_amount|float) if request_modifier == "by" else request_amount|float }}'
+    targets: joradan321312
+    undefined_variables: []
+    password: test123
+    email_from: 'arnavsajith04@gmail.com'
+  vars_files:
+    vars/shared_vars.yaml
   tasks:
-    - name: User Storage Query
-      community.general.zfs_facts:
-        dataset: 'zroot/empt/homes/arnavsajith'
-      
-      register: output
-    - debug:
-        msg: 'net change is {{ increase_amount }}'
+
+    - name: "Check if all variables are defined"
+      ansible.builtin.set_fact:
+        undefined_variables: '{{ undefined_variables + [item] }}'
+        error_message: "The following parameters could not be found in your user creation request. Please ensure that that all of them are included in your request, with the format 'parameter: value'\n\nMissing Parameters: "
+      when: vars[item] is undefined
+      with_items:
+        - password
+        - username
+        - first_name
+        - last_name
+
+    - name: "Create error message for missing variables"
+      ansible.builtin.set_fact:
+        error_message: "{{ error_message }} \n - {{ item }} "
+      with_items:
+        - "{{ undefined_variables }}"
+
+    - name: "Delete user accounts"
+      ansible.builtin.user:
+          name: '{{ targets }}'
+          state: absent
+          remove: true
+          force: true
+      loop:
+        - jailhost
+        - cifs
+        - ssh
+      delegate_to: '{{ item }}'

@@ -1,0 +1,258 @@
+- name: Create and delete users in the system
+
+  hosts: jailhost
+  become: true
+  become_method: community.general.doas
+  remote_user: ansible
+  gather_facts: no
+  vars_files:
+    - vars/shared_vars.yaml
+  vars:
+    user_exists: False
+  tasks:
+  # CHECK FACTS
+  - name: "Set Base Facts"
+    ansible.builtin.set_fact:
+      undefined_variables: []
+      error_message: "The following parameters could not be found in your user creation request. Please ensure that that all of them are included in your request, with the format: 'parameter: value'\n\nMissing Parameters: "
+
+  - name: "Send email notifying if target username is defined"
+    community.general.mail:
+          host: smtp.gmail.com
+          port: 465
+          secure: always
+          username: '{{ smtp_email }}'
+          password: '{{ smtp_password }}'
+          to: '{{ from }}'
+          from: '{{ smtp_email }}'
+          subject: "Could not execute your recent user management request"
+          body: "A valid username could not be found in the email that you sent. Please ensure that a target username is included in your request, with the format 'username: targeted_username'"
+    when: targets == None
+
+  - name: "Exit playbook run if no username is provided"
+    ansible.builtin.fail:
+        msg: "A username was not provided in the email request"
+    when: targets == None
+  
+  - name: "Get all users"
+    ansible.builtin.getent:
+      database: passwd
+
+  - name: "Check if all other variables are defined"
+    ansible.builtin.set_fact:
+      undefined_variables: '{{ undefined_variables + [item] }}'
+    when: vars[item] is undefined
+    with_items:
+      - password
+      - first_name
+      - last_name
+
+  - name: "Create error message for missing variables"
+    ansible.builtin.set_fact:
+      error_message: "{{ error_message }} \n - {{ item }}"
+    with_items:
+      - "{{ undefined_variables }}"
+  - name: "check if user exists"
+    ansible.builtin.set_fact:
+      user_exists: True
+    loop: '{{ getent_passwd.keys() }}'
+    when: targets in item
+
+  - name: "Send error message for missing information"
+    community.general.mail:
+            host: smtp.gmail.com
+            port: 465
+            secure: always
+            username: '{{ smtp_email }}'
+            password: '{{ smtp_password }}'
+            to: '{{ from }}'
+            from: '{{ smtp_email }}'
+            subject: "Could not execute your recent user management request"
+            body: '{{ error_message }}'
+    when: undefined_variables and verbs_positive
+
+  - name: "Exit playbook run if missing variables for a create account request"
+    ansible.builtin.fail:
+        msg: "Necessary information was not provided in the email request"
+    when: undefined_variables and verbs_positive
+
+  - name: "Attempted to add user that already exists"
+    community.general.mail:
+          host: smtp.gmail.com
+          port: 465
+          secure: always
+          username: '{{ smtp_email }}'
+          password: '{{ smtp_password }}'
+          to: '{{ from }}'
+          from: '{{ smtp_email }}'
+          subject: "Failed to create new user {{ targets }}in this organization"
+          body: "A user with the username {{ targets }}could not be created, since that user already exists. If you still want to create an account, please try again with a different username."
+    when: verbs_positive | bool and user_exists
+  
+  - name: "Exit playbook run if invalid request"
+    ansible.builtin.fail:
+        msg: "Attempted to create user but user already exists"
+    when: verbs_positive | bool and user_exists
+
+  - name: "Attempted to delete user that doesn't exist"
+    community.general.mail:
+          host: smtp.gmail.com
+          port: 465
+          secure: always
+          username: '{{ smtp_email }}'
+          password: '{{ smtp_password }}'
+          to: '{{ from }}'
+          from: '{{ smtp_email }}'
+          subject: "Failed to delete user {{ targets }}"
+          body: "A user with the username: {{ targets }} was not found in this organization. Please check for typos or misinputs in the request."
+    when: verbs_negative | bool and not user_exists
+  
+  - name: "Exit playbook run if invalid request"
+    ansible.builtin.fail:
+        msg: "Attempted to delete user but user does not exist"
+    when: verbs_negative | bool and not user_exists
+
+# BEGIN CREATE USER SECTION
+  - name: "Create home directory in jailhost"
+    community.general.zfs:
+      name: 'zroot/empt/homes/{{ targets }}'  # ASK ABOUT WHY MY USERS CREATED HAVE DIFFERENT /HOME DIRECTORIES THAN THE ORIGINAL ALICE BOB WHEN I USE CAT /ETC/PASSWD
+      state: present
+      extra_zfs_properties:
+        canmount: 'on'
+        quota: '0.1G'
+        reservation: '0.1G'
+    when: (verbs_positive | bool == True) and not user_exists
+
+  - name: "Create system unix users in the required hosts"
+    ansible.builtin.user:
+      name: '{{ targets }}'
+      password: '{{ password | ansible.builtin.password_hash }}' # make sure system can hash passwords -- needs python passlib
+      comment: '{{ first_name}} {{ last_name }}'
+      home: '/empt/homes/{{ targets }}'
+      uid: '{{ 60000 | random(start=3000) }}'
+    delegate_to: '{{ item }}'
+    loop:
+      - jailhost
+      - cifs
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Create login-capable system unix users in the required hosts" # ASK HOW THEY ARE LOGIN CAPABLE IF I CANT SSH OR IF IT MEANS LITERALLY CAN USE LOGIN COMMAND
+    ansible.builtin.user:
+      name: '{{ targets }}'
+      password: '{{ password | ansible.builtin.password_hash }}' # make sure system can hash passwords -- needs python passlib
+      comment: '{{ first_name}} {{ last_name }}'
+      home: '/home/{{ targets }}'
+      uid: '{{ 60000 | random(start=3000) }}'
+    delegate_to: ssh
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Change ownership of home to narrow strictly to human"
+    ansible.builtin.file:
+      name: '/empt/homes/{{ targets }}'
+      state: directory
+      recurse: true
+      mode: '1700'
+      owner: '{{ targets }}'
+      group: '{{ targets }}'
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Create dependent service jail's missing nullfs mount destinations"
+    ansible.builtin.file:
+      path: '/empt/jails/{{ item }}/home/{{ targets }}'
+      state: directory
+      mode: '0755'
+    loop:
+      - cifs
+      - ssh
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Add new home directory nullfs mount to dependent service jail fstabs"
+    ansible.builtin.lineinfile:
+      path: '/etc/jail_fstabs/{{ item }}.fstab'
+      line: '/empt/homes/{{ targets }} /empt/jails/{{ item }}/usr/home/{{ targets }} nullfs rw 0 0'
+    loop:
+      - cifs
+      - ssh
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Add new kerberos principal"
+    ansible.builtin.command: '/usr/local/bin/kadmin --local add --password={{ targets }} --use-defaults {{ targets }}'
+    delegate_to: kerberos
+    when: verbs_positive | bool and not user_exists
+    register: setup_jail_kerberos_add_user_principals_output
+    changed_when: setup_jail_kerberos_add_user_principals_output.rc == 0
+
+  - name: "Add human to mailserver vmailbox"
+    ansible.builtin.lineinfile:
+      path: /usr/local/etc/postfix/vmailbox
+      line: '{{ targets }}@{{ org_domain }} {{ org_domain }}/{{ targets }}'
+    delegate_to: mail
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Regenerate vmailbox postfix map"
+    ansible.builtin.command: 'postmap /usr/local/etc/postfix/vmailbox'
+    delegate_to: mail
+    register: setup_jail_mail_postmap
+    changed_when: setup_jail_mail_postmap.rc == 0
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Subscribe to full organization mailing list"
+    ansible.builtin.command: '/usr/local/bin/mlmmj-sub -L /var/spool/mlmmj/{{ org_domain }}/everyone -a {{ targets }}@{{ org_domain }} -c -f -s'
+    delegate_to: mail
+    register: mlmmj_sub_output
+    changed_when: mlmmj_sub_output.rc == 0
+    when: verbs_positive | bool and not user_exists
+
+  - name: "Send message on completion of user creation"
+    community.general.mail:
+            host: smtp.gmail.com
+            port: 465
+            secure: always
+            username: '{{ smtp_email }}'
+            password: '{{ smtp_password }}'
+            to: '{{ from }}'
+            from: '{{ smtp_email }}'
+            subject: "Successfully created account for {{ first_name }} {{ last_name }}"
+            body: "{{ first_name }} {{ last_name }}'s account has been successfully created. Their username is {{ targets }}. Thank you for using the IT-Helpdesk."
+    when: mlmmj_sub_output.changed
+
+# END CREATE USER SECTION
+  - name: "Delete directory in jailhost"
+    community.general.zfs:
+      name: 'zroot/empt/homes/{{ targets }}'
+      state: absent
+    when: verbs_negative | bool and user_exists
+
+  - name: "Delete kerberos principal for user"
+    ansible.builtin.command: '/usr/local/bin/kadmin --local delete {{ targets }}'
+    delegate_to: kerberos
+    when: verbs_negative | bool and user_exists
+
+  - name: "Delete user accounts"
+    ansible.builtin.user:
+      name: '{{ targets }}'
+      state: absent
+      remove: true
+      force: true
+    loop:
+      - jailhost
+      - cifs
+      - ssh
+    when: verbs_negative | bool and user_exists
+    register: deleted_user
+    delegate_to: '{{ item }}'
+
+  - name: "Send message on completion of user deletion"
+    community.general.mail:
+            host: smtp.gmail.com
+            port: 465
+            secure: always
+            username: '{{ smtp_email }}'
+            password: '{{ smtp_password }}'
+            to: '{{ from }}'
+            from: '{{ smtp_email }}'
+            subject: "Successfully deleted user {{ targets }}"
+            body: 'The user {{ targets }} has been successfully removed. Thank you for using the IT-Helpdesk.'
+    when: deleted_user.changed
+# END DELETE USER SECTION
+# BEGIN ERRORS SECTION

@@ -8,7 +8,8 @@ import configparser
 request_type_lookup = {1: 'storage', 
                        2: 'manage_account', 
                        3: 'query_account',
-                       4: 'manage_users'}
+                       4: 'manage_users',
+                       5: 'help'}
 def strtobool (val):
     val = val.lower()
     if val in ('y', 'yes', 't', 'true', 'on', '1'):
@@ -27,20 +28,6 @@ def is_valid_amount(amount: str):
             return float(amount)
         except(ValueError):
             return False
-        
-def is_valid_target(target : str, request: dict):
-    vars = load_vars(f"{request_type_lookup[request['request_type']]}")
-    needs_user_validation = True
-    for section in vars:
-        if 'needs_user_validation' in vars[section] and request[section]:
-            needs_user_validation = strtobool(vars[section]['needs_user_validation'])
-
-    if needs_user_validation:
-        with open("./phrasebooks/existing_users.txt", 'r') as existing_users:
-            target = target.split("@")[0]
-            return True if target+'\n' in existing_users else False
-    else:
-        return True
         
 def load_phrases(phrasebook): # implement universal phrases with targets and self-targets
     with open(f"./phrasebooks/{phrasebook}.txt", "r") as phrases:
@@ -111,7 +98,7 @@ def parse_body_universal(parsed_subject_dict: dict):
             if not parse_body_dict['targets']:
                 target_index = body_words.index(match)
                 username = body_words[target_index + 1]
-                parse_body_dict['targets'] = "default user" if match == "default" else username.split("@")[0] if is_valid_target(username, parse_body_dict) else None
+                parse_body_dict['targets'] = "default user" if match == "default" else username.split("@")[0] #if is_valid_target(username, parse_body_dict) else None
                 del body_words[target_index]
 
             else:
@@ -130,11 +117,5 @@ def parse_body_universal(parsed_subject_dict: dict):
     return parse_body_dict
 
 def execute_request_universal(parsed_body_dict: dict):
-    if not parsed_body_dict['targets']:
-        request_contents = {}
-        request_contents['valid_target'] = False
-        return request_contents
-    else:
         request_contents = parsed_body_dict
-        request_contents['valid_target'] = True
         return request_contents

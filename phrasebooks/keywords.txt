@@ -6,3 +6,5 @@ username permissions password 'change username'
 'query account'
 *manage_users*
 new 'new user' 'new employee' onboarding delete 'delete user' remove 'add user'
+*help*
+documentation help

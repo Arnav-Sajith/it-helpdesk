@@ -7,13 +7,13 @@ Received: from mail.google.com ([209.202.207.61])
         for <vanrahtijas@gmail.com>
         (version=TLS1_3 cipher=TLS_CHACHA20_POLY1305_SHA256 bits=256/256);
         Thu, 12 Oct 2023 18:21:49 -0700 (PDT)
-From: vanrahtijas@gmail.com
+From: arnavsajith04@gmail.com
 X-Google-Original-From: arnavsajith@arnav.local
 Received: by mail.google.com (Postfix, from userid 501)
 	id 9B045DF2ED7; Thu, 12 Oct 2023 21:21:48 -0400 (EDT)
 To: vanrahtijas@gmail.com
-Subject: delete user
+Subject: Help
 Message-Id: <20231013012148.9B045DF2ED7@mail.google.com>
 Date: Thu, 12 Oct 2023 21:21:48 -0400 (EDT)
 
-Hello, I'd like to delete the user with the username: arnavsajith
+Help with: manage_users
