@@ -20,3 +20,16 @@
             subject: "Help with your manage_users request"
             body: "{{ manage_users_help }}"
       when: targets == 'manage_users'
+    
+    - name: "Storage Help Email"
+      community.general.mail:
+            host: smtp.gmail.com
+            port: 465
+            secure: always
+            username: '{{ smtp_email }}'
+            password: '{{ smtp_password }}'
+            to: '{{ from }}'
+            from: '{{ smtp_email }}'
+            subject: "Help with your storage request"
+            body: "{{ storage_help }}"
+      when: targets == 'storage'

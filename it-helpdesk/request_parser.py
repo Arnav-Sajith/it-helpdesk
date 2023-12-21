@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import re
 import shlex
-from pyisemail import is_email
-import configparser
 
 # for reference
 request_type_lookup = {1: 'storage', 
@@ -10,14 +8,6 @@ request_type_lookup = {1: 'storage',
                        3: 'query_account',
                        4: 'manage_users',
                        5: 'help'}
-def strtobool (val):
-    val = val.lower()
-    if val in ('y', 'yes', 't', 'true', 'on', '1'):
-        return True
-    elif val in ('n', 'no', 'f', 'false', 'off', '0'):
-        return False
-    else:
-        raise ValueError("invalid truth value %r" % (val,))
     
 
 def is_valid_amount(amount: str):
@@ -39,13 +29,7 @@ def load_phrases(phrasebook): # implement universal phrases with targets and sel
                 phrases_dict[key] = []
             elif line[0] != '#':
                 phrases_dict[key] = (shlex.split(line))
-    return phrases_dict
-
-def load_vars(filename):
-    config = configparser.ConfigParser()
-    config.read(f"./phrasebooks/vars/{filename}_vars.ini")
-    vars_dict = {section:dict(config.items(section)) for section in config.sections()}
-    return vars_dict        
+    return phrases_dict 
 
 def get_request_type(subject_entered):
     keywords = load_phrases("keywords")
@@ -98,15 +82,13 @@ def parse_body_universal(parsed_subject_dict: dict):
             if not parse_body_dict['targets']:
                 target_index = body_words.index(match)
                 username = body_words[target_index + 1]
-                parse_body_dict['targets'] = "default user" if match == "default" else username.split("@")[0] #if is_valid_target(username, parse_body_dict) else None
+                parse_body_dict['targets'] = username.split("@")[0] #if is_valid_target(username, parse_body_dict) else None
                 del body_words[target_index]
-
             else:
                 target_index = body_words.index(match)
                 target_value = body_words[target_index + 1]
                 parse_body_dict[match.strip(':')] = target_value
                 del body_words[target_index]
-
         else:
             if any(self_target in body_words for self_target in phrases["selftargets"]):
                 parse_body_dict['targets'] = parse_body_dict['email'].split("@")[0]

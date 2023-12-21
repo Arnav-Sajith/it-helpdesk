@@ -163,5 +163,6 @@ cython_debug/
 *.log
 .reproducibility
 artifacts/
+it-helpdesk/artifacts/
 *.rb
-ansible/vars
+it-helpdesk/ansible/vars
