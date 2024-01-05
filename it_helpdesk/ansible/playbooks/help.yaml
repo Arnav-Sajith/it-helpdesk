@@ -6,7 +6,7 @@
   remote_user: ansible
   gather_facts: false
   vars_files:
-    - vars/shared_vars.yaml
+    - ../vars/shared_vars.yaml
   tasks:
     - name: "Manage Users Help Email"
       community.general.mail:
