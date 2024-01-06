@@ -6,7 +6,7 @@
   remote_user: ansible
   gather_facts: no
   vars_files:
-    - vars/shared_vars.yaml
+    - ../vars/shared_vars.yaml
   vars:
     user_exists: False
   tasks:

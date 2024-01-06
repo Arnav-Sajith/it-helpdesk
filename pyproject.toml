@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "it-helpdesk"
-version = "0.0.9"
+version = "0.1.3"
 description = "test_description"
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
@@ -11,9 +11,10 @@ python = "^3.11"
 ansible-runner = "^2.3.4"
 ansible = "^9.1.0"
 wheel = "^0.42.0"
-pyinquirer = "^1.0.3"
+inquirerpy = "^0.3.4"
 
-
+[tool.poetry.scripts]
+setup = "it_helpdesk.setup:main"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

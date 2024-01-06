@@ -24,7 +24,7 @@
     increase_amount: '{{(current_quota|float + request_amount|float) if modifiers == "by" else request_amount|float }}'
 
   vars_files:
-    - vars/shared_vars.yaml
+    - ../vars/shared_vars.yaml
 
   tasks:
     - name: "Send email notifying of invalid request"

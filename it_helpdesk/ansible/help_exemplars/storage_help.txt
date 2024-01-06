@@ -1,0 +1,12 @@
+Here is an exemplar of how to use the storage management function of the IT-Helpdesk to increase your accounts storage allocation, or to query your account to see how much space you have left/how much you have used:
+
+Increasing Storage:
+
+Subject: Increase Storage Quota
+Body:
+Increase the storage allocation for user: [your_username] [by/to] [desired amount] GB.
+
+Querying account storage:
+Subject: Storage Query
+Body:
+How much storage does user: [your_username] have left

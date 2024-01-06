@@ -1,14 +1,10 @@
 #!/usr/bin/env python
 import re
 import shlex
+import os
+import yaml
 
 # for reference
-request_type_lookup = {1: 'storage', 
-                       2: 'manage_account', 
-                       3: 'query_account',
-                       4: 'manage_users',
-                       5: 'help'}
-    
 
 def is_valid_amount(amount: str):
     if amount.isdigit():
@@ -19,8 +15,9 @@ def is_valid_amount(amount: str):
         except(ValueError):
             return False
         
-def load_phrases(phrasebook): # implement universal phrases with targets and self-targets
-    with open(f"./phrasebooks/{phrasebook}.txt", "r") as phrases:
+def load_phrases(phrasebook, current_dir): # implement universal phrases with targets and self-targets
+    os.chdir(current_dir)
+    with open(f"phrasebooks/{phrasebook}.txt", "r") as phrases:
         phrases_dict = {}
         key = None  # store the most recent "command" here
         for line in phrases.readlines():
@@ -31,8 +28,8 @@ def load_phrases(phrasebook): # implement universal phrases with targets and sel
                 phrases_dict[key] = (shlex.split(line))
     return phrases_dict 
 
-def get_request_type(subject_entered):
-    keywords = load_phrases("keywords")
+def get_request_type(subject_entered, current_dir):
+    keywords = load_phrases("keywords", current_dir)
     subject = subject_entered.lower()
     count = 1
     for request_type in keywords:
@@ -40,18 +37,20 @@ def get_request_type(subject_entered):
             return count
         count += 1
 
-def parse_subject_universal(subject_entered : str, email_from : str, body : str):
-    subject = subject_entered.lower()
-    request_type = get_request_type(subject)
-    
-    subject_words = set(subject.split()) # Create a set of subject words, stopping substring matching and improving speed
-    phrases = load_phrases(f"{request_type_lookup[request_type]}_phrases")
-    parse_subject_dict = {key: None for key in phrases.keys()}
-    parse_subject_dict.update({'request_type': request_type, 'email': email_from, 'body': body, 'phrases': phrases})
-    for phrase in phrases:
-        if any(keyword in subject_words for keyword in phrases[phrase]):
-            parse_subject_dict[phrase] = True            
-    return parse_subject_dict
+def parse_subject_universal(subject_entered : str, email_from : str, body : str, current_dir : str):
+    os.chdir(current_dir)
+    with open('vars/it_helpdesk_config.yaml') as config:
+        requests_directory = yaml.safe_load(config)['requests_directory']
+        subject = subject_entered.lower()
+        request_type = get_request_type(subject, current_dir)
+        subject_words = set(subject.split()) # Create a set of subject words, stopping substring matching and improving speed
+        phrases = load_phrases(f"{requests_directory[request_type]}_phrases", current_dir)
+        parse_subject_dict = {key: None for key in phrases.keys()}
+        parse_subject_dict.update({'request_type': request_type, 'email': email_from, 'body': body, 'phrases': phrases})
+        for phrase in phrases:
+            if any(keyword in subject_words for keyword in phrases[phrase]):
+                parse_subject_dict[phrase] = True            
+        return parse_subject_dict
 
 def parse_body_universal(parsed_subject_dict: dict):
     parse_body_dict = parsed_subject_dict

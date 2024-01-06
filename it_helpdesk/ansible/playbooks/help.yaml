@@ -18,9 +18,9 @@
             to: '{{ from }}'
             from: '{{ smtp_email }}'
             subject: "Help with your manage_users request"
-            body: "{{ manage_users_help }}"
+            body: "{{ manage_users_help }}" # NEED TO CHANGE THIS TO TEXT FILE
       when: targets == 'manage_users'
-    
+
     - name: "Storage Help Email"
       community.general.mail:
             host: smtp.gmail.com
@@ -31,5 +31,5 @@
             to: '{{ from }}'
             from: '{{ smtp_email }}'
             subject: "Help with your storage request"
-            body: "{{ storage_help }}"
+            body: "{{ storage_help }}" # NEED TO CHANGE THIS TO TEXT FILE
       when: targets == 'storage'

@@ -8,9 +8,9 @@
     request_from: '{{ from }}'
 
   vars_files:
-    - vars/credentials.yaml
+    - ../vars/it_helpdisk_config.yaml
 
-  
+
   tasks:
     - name: Invalid target
       community.general.mail:

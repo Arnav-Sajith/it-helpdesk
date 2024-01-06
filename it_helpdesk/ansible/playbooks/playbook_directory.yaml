@@ -1,0 +1,7 @@
+request_type_lookup:
+                    0: 'invalid_request'
+                    1: 'storage' 
+                    2: 'manage_account'
+                    3: 'query_account'
+                    4: 'manage_users'
+                    5: 'help'
