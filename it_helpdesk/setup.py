@@ -1,12 +1,10 @@
-from __future__ import print_function, unicode_literals
 import os
-import sys
 import shutil
 import it_helpdesk
 import yaml
-from InquirerPy import prompt
+from InquirerPy import prompt, inquirer
 from InquirerPy.validator import PathValidator
-from InquirerPy import utils, inquirer
+
 
 
 
@@ -16,57 +14,55 @@ def main():
     question_1 = [
         {'type': 'list',
          'name': 'interactive_install',
-         'message': 'Would you like to do an interactive or manual set-up (advanced)',
-         'choices': ['interactive', 'manual']
+         'wrap_lines': True,
+         'message': 'Welcome to the setup installer for the autonomous it-helpdesk. This software is intended to be used in conjunction with the EMPT IT suite. This tool will set up the directories and configuration files for all of the ansible automation you will be working with. Press Continue to proceed.',
+         'choices': ['Continue'],
+         'qmark': '',
+         'amark': ''
         }
     ]
-    answer1 = prompt(questions=question_1)
+    prompt(questions=question_1)
     
-    if answer1.get('interactive_install') == 'manual':
-        helpdesk_dir = os.path.join(os.path.expanduser('~'), 'it-helpdesk')
-        try:
-            os.mkdir(helpdesk_dir)
-            shutil.copytree(ansible_default_files, os.path.join(os.path.expanduser('~'), 'ansible'), dirs_exist_ok=True)
-
-        except: 
-            shutil.copytree(ansible_default_files, os.path.join(os.path.expanduser('~'), 'ansible'), dirs_exist_ok=True)
-        with open(f'{os.path.join(helpdesk_dir, "ansible", "vars", "it_helpdesk_config.yaml")}', 'w') as config:
-            yaml.dump({'helpdesk_dir': helpdesk_dir,
-                        'org_domain': '',
-                        'mail_server': '',
-                        'helpdesk_email': '',
-                        'helpdesk_password': ''}, config)
-        print('')
-        result = inquirer.select(message=f"The default files have been copied to {helpdesk_dir} and are manually configurable. Thank you for installing the it-helpdesk.", choices=["Exit"]).execute()
-
-    else:
+    while True:
         question_2 = [
             {'type': 'filepath',
             'name': 'install_dir',
             'default': os.path.expanduser('~'),
-            'message': f'Please specify the directory where the ansible configuration should be stored:',
+            'message': f'Please specify the parent directory where the it-helpdesk folder should be stored:',
             "validate": PathValidator(is_dir=True, message="Input is not a directory"),
-            "only_directories": True
+            "only_directories": True,
+            'wrap_lines': True,
+            'qmark': '',
+            'amark': '',
             }
         ]
         print('')
+
         answer2 = prompt(questions=question_2)
         helpdesk_dir = os.path.join(answer2.get('install_dir'), 'it-helpdesk')
+        if inquirer.confirm(message=f"The it-helpdesk will be installed to {helpdesk_dir}. Is this okay? (Default: No)", mandatory=True, qmark='', amark='', wrap_lines=True).execute() == True:
+            try:
+                os.mkdir(helpdesk_dir)
+                shutil.copytree(ansible_default_files, helpdesk_ansible_dir)
+                shutil.copyfile('../mail_script.py', helpdesk_ansible_dir)
+                break
+
+            except FileExistsError: 
+                print("The it-helpdesk already exists in that directory. Please select another folder, or use that install.")
+            
+
         helpdesk_ansible_dir = os.path.join(helpdesk_dir, 'ansible')
-    
-        try:
-            os.mkdir(helpdesk_dir)
-            shutil.copytree(ansible_default_files, helpdesk_ansible_dir, dirs_exist_ok=True)
 
-        except: 
-            shutil.copytree(ansible_default_files, helpdesk_ansible_dir, dirs_exist_ok=True)                
-
+        
         question_3 = [
             {'type': 'input',
             'name': 'org_domain',
-            'message': f'Please enter your organizations domain',
+            'message': f'Please enter your organizations domain:',
             'validate': lambda answer: 'You must enter a domain for your organization.' \
-                if len(answer) == 0 else True
+                if len(answer) == 0 else True,
+            'amark': '',
+            'qmark': '',
+            'wrap_lines': True,
             }
         ]
         answer3 = prompt(questions=question_3)
@@ -76,6 +72,9 @@ def main():
             {'type': 'input',
             'name': 'mail_server',
             'message': f'Please specify the address of your organizations mail server: (leave blank for default - localhost))',
+            'amark': '',
+            'qmark': '',
+            'wrap_lines': True,
             }
         ]
         answer4 = prompt(questions=question_4)
@@ -85,7 +84,11 @@ def main():
             {'type': 'input',
             'name': 'helpdesk_email',
             'message': f'Please enter the email address for the it-helpdesk: (leave blank for default - it-helpdesk@{org_domain})',
+            'qmark': '',
+            'amark': '',
+            'wrap_lines': True,
             }
+            
         ]
         answer5 = prompt(questions=question_5)
         helpdesk_email = f'it-helpdesk@{org_domain}' if len(answer5.get('helpdesk_email')) == 0 else answer5.get('helpdesk_email')
@@ -94,6 +97,9 @@ def main():
             {'type': 'password',
             'name': 'helpdesk_password',
             'message': f'Please enter the password for the it-helpdesks email address',
+            'qmark': '',
+            'amark': '',
+            'wrap_lines': True,
             }
         ]
         answer6 = prompt(questions=question_6)
@@ -103,9 +109,12 @@ def main():
             yaml.dump({'helpdesk_dir': helpdesk_dir,
                         'org_domain': org_domain,
                         'mail_server': mail_server,
+                        'mail_port': '',
                         'helpdesk_email': helpdesk_email,
                         'helpdesk_password': helpdesk_password}, config)
-        result = inquirer.confirm(message=f"Installation complete. The it-helpdesk content is available at {helpdesk_dir}. Thank you for installing the it-helpdesk.").execute()
+        inquirer.select(message=f'''The default files have been copied to {helpdesk_dir} where they can be manually changed, and the helpdesk should now work. Please
+                        ensure to fill out the Ansible inventory in the directory, and to configure your helpdesks email client to run the script located at {helpdesk_dir}/mail_script.py upon receiving an email. 
+                        Thank you for installing the it-helpdesk.''', choices=["Exit"], qmark='', amark='', wrap_lines=True).execute()
 
 
 if __name__ == '__main__':

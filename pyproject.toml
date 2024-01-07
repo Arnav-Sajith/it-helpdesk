@@ -5,16 +5,20 @@ description = "test_description"
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
 readme = "README.md"
+dependencies = [
+
 
 [tool.poetry.dependencies]
 python = "^3.11"
 ansible-runner = "^2.3.4"
-ansible = "^9.1.0"
+ansible = "^8.5.0"
 wheel = "^0.42.0"
 inquirerpy = "^0.3.4"
 
+
 [tool.poetry.scripts]
-setup = "it_helpdesk.setup:main"
+setup_helpdesk = "it_helpdesk.setup:main"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

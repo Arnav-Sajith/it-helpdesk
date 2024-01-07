@@ -15,13 +15,11 @@
 
     request_action: "{{ 'increase' if (verbs_positive|bool == True) else 'decrease'}}"
 
-    request_from: "{{ from }}"
-
-    target_valid: "{{ valid_target }}"
+    request_net_change: "{{ request_amount if request_action == 'increase' else request_amount * -1 }}"
 
     current_quota: '{{ (ansible_zfs_datasets[0].reservation | replace("G", "")) | float}}'
 
-    increase_amount: '{{(current_quota|float + request_amount|float) if modifiers == "by" else request_amount|float }}'
+    increase_amount: '{{(current_quota|float + request_net_change|float) if modifiers == "by" else request_amount|float }}'
 
   vars_files:
     - ../vars/shared_vars.yaml
@@ -29,15 +27,15 @@
   tasks:
     - name: "Send email notifying of invalid request"
       community.general.mail:
-              host: smtp.gmail.com
-              port: 465
+              host: '{{ mail_server }}'
+              port: '{{ mail_port }}'
               secure: always
-              username: '{{ smtp_email }}'
-              password: '{{ smtp_password }}'
+              username: '{{ helpdesk_email }}'
+              password: '{{ helpdesk_password }}'
               to: '{{ from }}'
-              from: '{{ smtp_email }}'
+              from: '{{ helpdesk_email }}'
               subject: "Could not execute your recent user management request"
-              body: "We couldn't understand what you wanted from your previous user management request. Please ensure that all necessary information is included. Send an email with the subject: Help and body: help with: storage'"
+              body: "We couldn't understand what you wanted from your previous user management request. Please ensure that all necessary information is included. Send an email with the subject: Help and body: 'help with: manage_users' to see how to properly format your request.'"
       when: verbs_positive == None and verbs_negative == None and queries == None
 
     - name: "Exit playbook run if invalid request"
@@ -53,13 +51,13 @@
 
     - name: "Send email notifying if target username is undefined"
       community.general.mail:
-        host: smtp.gmail.com
-        port: 465
+        host: '{{ mail_server }}'
+        port: '{{ mail_port }}'
         secure: always
-        username: '{{ smtp_email }}'
-        password: '{{ smtp_password }}'
+        username: '{{ helpdesk_email }}'
+        password: '{{ helpdesk_password }}'
         to: '{{ from }}'
-        from: '{{ smtp_email }}'
+        from: '{{ helpdesk_email }}'
         subject: "Could not execute your recent user management request"
         body: "The username provided: {{ targets }} is not a valid user. Please ensure to include a user with the format 'username: targeted_username', and that the user exists in your organization."
       when: targets == None or zfs_query is failed
@@ -81,26 +79,26 @@
 
         - name: "Send failure message if zfs failed"
           community.general.mail:
-            host: smtp.gmail.com
-            port: 465
+            host: '{{ mail_server }}'
+            port: '{{ mail_port }}'
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ [ targets ,  from ] | unique }}'
-            from: '{{ smtp_email }}'
+            from: '{{ helpdesk_email }}'
             subject: "Failed to increase storage allocation"
             body: "Your storage increase request failed for the following reason: {{ zfs_increase_storage_output.stderr }}. Please contact your IT department and provide them with this error, if it is not easily fixable."
           when: zfs_increase_storage_output.rc != 0
         
         - name: Send confirmation Email
           community.general.mail:
-            host: smtp.gmail.com
-            port: 465
+            host: '{{ mail_server }}'
+            port: '{{ mail_port }}'
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ [ targets ,  from ] | unique }}'
-            from: '{{ smtp_email }}'
+            from: '{{ helpdesk_email }}'
             subject: "Confirmation of {{ request_action }} storage request for user {{ targets }}"
             body: "The storage quota for user {{ targets }}has been {{request_action}}d {{ modifiers }} {{ request_amount }} {{ request_unit }}"
           when: zfs_increase_storage_output.rc == 0
@@ -108,13 +106,13 @@
 
     - name: Send query response
       community.general.mail:
-        host: smtp.gmail.com
-        port: 465
+        host: '{{ mail_server }}'
+        port: '{{ mail_port }}'
         secure: always
-        username: '{{ smtp_email }}'
-        password: '{{ smtp_password }}'
+        username: '{{ helpdesk_email }}'
+        password: '{{ helpdesk_password }}'
         to: '{{ [ targets ,  from ] | unique }}'
-        from: '{{ smtp_email }}'
+        from: '{{ helpdesk_email }}'
         subject: "Storage query for user {{ targets }}"
         body: "Your account has a quota (maximum space) of {{ ansible_zfs_datasets[0].quota }}, of which {{ ansible_zfs_datasets[0].reservation }} is already reserved. You have used {{ ansible_zfs_datasets[0].used }} so far."
       when: queries 

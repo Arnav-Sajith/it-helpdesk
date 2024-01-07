@@ -15,8 +15,8 @@ def is_valid_amount(amount: str):
         except(ValueError):
             return False
         
-def load_phrases(phrasebook, current_dir): # implement universal phrases with targets and self-targets
-    os.chdir(current_dir)
+def load_phrases(phrasebook, helpdesk_dir): # implement universal phrases with targets and self-targets
+    os.chdir(helpdesk_dir)
     with open(f"phrasebooks/{phrasebook}.txt", "r") as phrases:
         phrases_dict = {}
         key = None  # store the most recent "command" here
@@ -28,8 +28,8 @@ def load_phrases(phrasebook, current_dir): # implement universal phrases with ta
                 phrases_dict[key] = (shlex.split(line))
     return phrases_dict 
 
-def get_request_type(subject_entered, current_dir):
-    keywords = load_phrases("keywords", current_dir)
+def get_request_type(subject_entered, helpdesk_dir):
+    keywords = load_phrases("keywords", helpdesk_dir)
     subject = subject_entered.lower()
     count = 1
     for request_type in keywords:
@@ -37,14 +37,14 @@ def get_request_type(subject_entered, current_dir):
             return count
         count += 1
 
-def parse_subject_universal(subject_entered : str, email_from : str, body : str, current_dir : str):
-    os.chdir(current_dir)
+def parse_subject_universal(subject_entered : str, email_from : str, body : str, helpdesk_dir : str):
+    os.chdir(helpdesk_dir)
     with open('vars/it_helpdesk_config.yaml') as config:
         requests_directory = yaml.safe_load(config)['requests_directory']
         subject = subject_entered.lower()
-        request_type = get_request_type(subject, current_dir)
+        request_type = get_request_type(subject, helpdesk_dir)
         subject_words = set(subject.split()) # Create a set of subject words, stopping substring matching and improving speed
-        phrases = load_phrases(f"{requests_directory[request_type]}_phrases", current_dir)
+        phrases = load_phrases(f"{requests_directory[request_type]}_phrases", helpdesk_dir)
         parse_subject_dict = {key: None for key in phrases.keys()}
         parse_subject_dict.update({'request_type': request_type, 'email': email_from, 'body': body, 'phrases': phrases})
         for phrase in phrases:

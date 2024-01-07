@@ -1,12 +1,17 @@
 helpdesk_dir: /Users/arnavsajith/Public/it-helpdesk
-helpdesk_email: aksdksad@fccac
-helpdesk_password: asdassadasdjxcddjdj
-mail_server: localhost
+
+helpdesk_email: vanrahtijas@gmail.com
+
+helpdesk_password: xlyvfrrpqbmlrndr
+
+mail_server: smtp.gmail.com
+
 org_domain: iasdsadsac
 
-requests_directory: {0: 'invalid_request',
-                     1: 'storage', 
-                     2: 'manage_account', 
-                     3: 'query_account',
-                     4: 'manage_users',
-                     5: 'help'}
+requests_directory: {1: 'help',
+                     2: 'storage',
+                     3: 'manage_account', 
+                     4: 'query_account',
+                     5: 'manage_users',
+                     }
+                 

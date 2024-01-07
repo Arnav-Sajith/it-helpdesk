@@ -1,41 +1,18 @@
-- hosts: jailhost
-  become: true
-  become_method: community.general.doas
-  remote_user: ansible
-  vars:
-    targets: joradan321312
-    undefined_variables: []
-    password: test123
-    email_from: 'arnavsajith04@gmail.com'
+- name: Create and delete users in the system
+
+  hosts: localhost
+  gather_facts: false
   vars_files:
-    vars/shared_vars.yaml
+    - ../vars/it_helpdesk_config.yaml
   tasks:
-
-    - name: "Check if all variables are defined"
-      ansible.builtin.set_fact:
-        undefined_variables: '{{ undefined_variables + [item] }}'
-        error_message: "The following parameters could not be found in your user creation request. Please ensure that that all of them are included in your request, with the format 'parameter: value'\n\nMissing Parameters: "
-      when: vars[item] is undefined
-      with_items:
-        - password
-        - username
-        - first_name
-        - last_name
-
-    - name: "Create error message for missing variables"
-      ansible.builtin.set_fact:
-        error_message: "{{ error_message }} \n - {{ item }} "
-      with_items:
-        - "{{ undefined_variables }}"
-
-    - name: "Delete user accounts"
-      ansible.builtin.user:
-          name: '{{ targets }}'
-          state: absent
-          remove: true
-          force: true
-      loop:
-        - jailhost
-        - cifs
-        - ssh
-      delegate_to: '{{ item }}'
+    - name: "Manage Users Help Email"
+      community.general.mail:
+            host: smtp.gmail.com
+            port: 465
+            secure: always
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
+            to: 'arnavsajith04@gmail.com'
+            from: '{{ helpdesk_email }}'
+            subject: "Help with your manage_users request"
+            body: "{{ lookup('file', '{{ helpdesk_dir }}/ansible/help_exemplars/manage_users_help.txt') }}" # NEED TO CHANGE THIS TO TEXT FILE

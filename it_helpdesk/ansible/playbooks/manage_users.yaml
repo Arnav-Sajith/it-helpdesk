@@ -6,7 +6,7 @@
   remote_user: ansible
   gather_facts: no
   vars_files:
-    - ../vars/shared_vars.yaml
+    - ../vars/it_helpdesk_config.yaml
   vars:
     user_exists: False
   tasks:
@@ -18,13 +18,13 @@
 
   - name: "Send email notifying if target username is defined"
     community.general.mail:
-          host: smtp.gmail.com
-          port: 465
+          host: '{{ mail_server }}'
+          port: '{{ mail_port }}'
           secure: always
-          username: '{{ smtp_email }}'
-          password: '{{ smtp_password }}'
+          username: '{{ helpdesk_email }}'
+          password: '{{ helpdesk_password }}'
           to: '{{ from }}'
-          from: '{{ smtp_email }}'
+          from: '{{ helpdesk_email }}'
           subject: "Could not execute your recent user management request"
           body: "A valid username could not be found in the email that you sent. Please ensure that a target username is included in your request, with the format 'username: targeted_username'"
     when: targets == None
@@ -60,13 +60,13 @@
 
   - name: "Send error message for missing information"
     community.general.mail:
-            host: smtp.gmail.com
-            port: 465
+            host: '{{ mail_server }}'
+            port: '{{ mail_port }}'
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ from }}'
-            from: '{{ smtp_email }}'
+            from: '{{ helpdesk_email }}'
             subject: "Could not execute your recent user management request"
             body: '{{ error_message }}'
     when: undefined_variables and verbs_positive
@@ -78,13 +78,13 @@
 
   - name: "Attempted to add user that already exists"
     community.general.mail:
-          host: smtp.gmail.com
-          port: 465
+          host: '{{ mail_server }}'
+          port: '{{ mail_port }}'
           secure: always
-          username: '{{ smtp_email }}'
-          password: '{{ smtp_password }}'
+          username: '{{ helpdesk_email }}'
+          password: '{{ helpdesk_password }}'
           to: '{{ from }}'
-          from: '{{ smtp_email }}'
+          from: '{{ helpdesk_email }}'
           subject: "Failed to create new user {{ targets }}in this organization"
           body: "A user with the username {{ targets }}could not be created, since that user already exists. If you still want to create an account, please try again with a different username."
     when: verbs_positive | bool and user_exists
@@ -96,13 +96,13 @@
 
   - name: "Attempted to delete user that doesn't exist"
     community.general.mail:
-          host: smtp.gmail.com
-          port: 465
+          host: '{{ mail_server }}'
+          port: '{{ mail_port }}'
           secure: always
-          username: '{{ smtp_email }}'
-          password: '{{ smtp_password }}'
+          username: '{{ helpdesk_email }}'
+          password: '{{ helpdesk_password }}'
           to: '{{ from }}'
-          from: '{{ smtp_email }}'
+          from: '{{ helpdesk_email }}'
           subject: "Failed to delete user {{ targets }}"
           body: "A user with the username: {{ targets }} was not found in this organization. Please check for typos or misinputs in the request."
     when: verbs_negative | bool and not user_exists
@@ -205,13 +205,13 @@
 
   - name: "Send message on completion of user creation"
     community.general.mail:
-            host: smtp.gmail.com
-            port: 465
+            host: '{{ mail_server }}'
+            port: '{{ mail_port }}'
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ from }}'
-            from: '{{ smtp_email }}'
+            from: '{{ helpdesk_email }}'
             subject: "Successfully created account for {{ first_name }} {{ last_name }}"
             body: "{{ first_name }} {{ last_name }}'s account has been successfully created. Their username is {{ targets }}. Thank you for using the IT-Helpdesk."
     when: mlmmj_sub_output.changed
@@ -244,13 +244,13 @@
 
   - name: "Send message on completion of user deletion"
     community.general.mail:
-            host: smtp.gmail.com
-            port: 465
+            host: '{{ mail_server }}'
+            port: '{{ mail_port }}'
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ from }}'
-            from: '{{ smtp_email }}'
+            from: '{{ helpdesk_email }}'
             subject: "Successfully deleted user {{ targets }}"
             body: 'The user {{ targets }} has been successfully removed. Thank you for using the IT-Helpdesk.'
     when: deleted_user.changed

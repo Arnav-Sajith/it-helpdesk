@@ -6,30 +6,16 @@
   remote_user: ansible
   gather_facts: false
   vars_files:
-    - ../vars/shared_vars.yaml
+    - ../vars/it_helpdesk_config.yaml
   tasks:
-    - name: "Manage Users Help Email"
+    - name: "Send Help Email"
       community.general.mail:
-            host: smtp.gmail.com
+            host: '{{ mail_server }}'
             port: 465
             secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
+            username: '{{ helpdesk_email }}'
+            password: '{{ helpdesk_password }}'
             to: '{{ from }}'
-            from: '{{ smtp_email }}'
-            subject: "Help with your manage_users request"
-            body: "{{ manage_users_help }}" # NEED TO CHANGE THIS TO TEXT FILE
-      when: targets == 'manage_users'
-
-    - name: "Storage Help Email"
-      community.general.mail:
-            host: smtp.gmail.com
-            port: 465
-            secure: always
-            username: '{{ smtp_email }}'
-            password: '{{ smtp_password }}'
-            to: '{{ from }}'
-            from: '{{ smtp_email }}'
-            subject: "Help with your storage request"
-            body: "{{ storage_help }}" # NEED TO CHANGE THIS TO TEXT FILE
-      when: targets == 'storage'
+            from: '{{ helpdesk_email }}'
+            subject: "Help with your {{ targets }} request"
+            body: "{{ lookup('file', '{{ helpdesk_dir }}/ansible/help_exemplars/{{ targets }}_help.txt') }}" 
