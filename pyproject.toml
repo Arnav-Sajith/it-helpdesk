@@ -1,12 +1,10 @@
 [tool.poetry]
 name = "it-helpdesk"
-version = "0.1.3"
+version = "0.1.4"
 description = "test_description"
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
 readme = "README.md"
-dependencies = [
-
 
 [tool.poetry.dependencies]
 python = "^3.11"
