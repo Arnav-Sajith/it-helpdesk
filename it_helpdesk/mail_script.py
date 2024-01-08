@@ -6,10 +6,13 @@ import yaml
 
 def main():
     path = os.path.join(os.path.dirname(__file__), 'ansible/vars/it_helpdesk_config.yaml')
-    with open(path) as config:
-        message = message_from_file(stdin, policy=policy.default)
-        # message = message_from_file(open(os.path.join(os.path.dirname(__file__),'ansible/sample_email.txt'), 'r'), policy=policy.default)
-        gre.main(message, f'{yaml.safe_load(config)["helpdesk_dir"]}/ansible')
+    with open(path) as config_file:
+        config = yaml.safe_load(config_file)
+        if config['testing_mode'] == True:
+            message = message_from_file(open(os.path.join(os.path.dirname(__file__),'ansible/sample_email.txt'), 'r'), policy=policy.default)
+        else:
+            message = message_from_file(stdin, policy=policy.default)
+        gre.main(message, os.path.join(config["helpdesk_dir"], 'ansible'))
 
 if __name__ == '__main__':
     main()
