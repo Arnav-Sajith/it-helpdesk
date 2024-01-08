@@ -10,7 +10,7 @@ def ansible_run(request_type : int, request_contents : dict, helpdesk_dir: str):
     with open('vars/it_helpdesk_config.yaml', 'r') as config:
         print('working')
         config_file = yaml.safe_load(config)
-        runner_config = RunnerConfig(private_data_dir = helpdesk_dir, inventory="./inventory", playbook=f"{helpdesk_dir}/{config_file['requests_directory'][request_type]}.yaml", extravars = request_contents)
+        runner_config = RunnerConfig(private_data_dir = helpdesk_dir, inventory="./inventory", playbook=f"{helpdesk_dir}/playbooks/{config_file['requests_directory'][request_type]}.yaml", extravars = request_contents)
         runner_config.prepare()
         rc = Runner(config=runner_config)
         rc.run()

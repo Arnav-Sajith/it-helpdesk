@@ -50,7 +50,7 @@ def main():
                 break
 
             except FileExistsError: 
-                print("The it-helpdesk already exists in that directory. Please select another folder, or use that install.")
+                print("The it-helpdesk already exists in that directory. Please select another folder.")
             
 
     question_3 = [
@@ -118,6 +118,11 @@ def main():
                                            5: 'manage_users',}}, config)
     inquirer.select(message=f'''The default files have been copied to {helpdesk_dir} where they can be manually changed, and the helpdesk should now work. Please ensure to fill out the Ansible inventory in the directory, and to configure your helpdesks email client to run the script located at {helpdesk_dir}/mail_script.py upon receiving an email. 
                     Thank you for installing the it-helpdesk.''', choices=["Exit"], qmark='', amark='', wrap_lines=True).execute()
+    
+    with open(os.path.join(package_dir, 'mode_swap.py'), 'a') as mode_swap:
+        for line in mode_swap:
+            if line.split()[0] == 'helpdesk_dir':
+                line.replace(line, f'helpdesk_dir = {helpdesk_dir} ')
 
 
 if __name__ == '__main__':

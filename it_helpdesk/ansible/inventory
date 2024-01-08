@@ -1,0 +1,9 @@
+# EMPT BASE
+jailhost     ansible_host=
+[jails]
+certauth     ansible_host=
+cifs         ansible_host=
+kerberos     ansible_host=
+mail         ansible_host=
+prometheus   ansible_host=
+ssh          ansible_host=

@@ -107,6 +107,8 @@ The first target in the phrasebook will always occupy the ```targets: value``` r
 The phrasebook used to parse the email is determined without having to search all of the phrasebooks and finding matches by the use of a separate, but linked, keyword file. This contains a few words/phrases that have to exist in the *subject* of the email in order to cut down on parsing time for efficiency. There is a single keyword file that contains all of the keywords for every playbook and phrasebook that exists, and the keywords must be unique. When a match is found, it is looked up in the ```it_helpdesk_config.yaml```'s request directory for reference and organization.
 Default ```.keywords.txt``` file:
 ```
+*help*
+documentation help
 *storage*
 storage space quota
 *manage_account*
@@ -115,8 +117,6 @@ username permissions password 'change username'
 'query account'
 *manage_users*
 new 'new user' 'new employee' onboarding delete 'delete user' remove 'add user'
-*help*
-documentation help
 ```
 ```
 requests_directory: {1: 'help',
@@ -127,7 +127,7 @@ requests_directory: {1: 'help',
                      }
 ```
 #### How to use keywords
-The keywords file functions similarly to the phrasebooks. It flags the sections True/False if any of its keywords are found in the email subject, and returns the request type after looking it up in the ```it_helpdesk_config.yaml```'s request directory. For example, if the subject of the email is ```Increase Storage Quota```, it will flag ```storage``` as True, and return ```request_type: 2``` to the helpdesk so it can start the parsing.
+The keywords file functions similarly to the phrasebooks. It flags the sections True/False if any of its keywords are found in the email subject, and returns the request type after looking it up in the ```it_helpdesk_config.yaml```'s request directory. For example, if the subject of the email is ```Increase Storage Quota```, it will flag ```storage``` as True, and return ```request_type: 2``` to the helpdesk so it can start the parsing. The order of entries in the ```.keywords.txt``` file has to match the ```requests_directory``` in order for the system to work. 
 
 ### Naming conventions
 
