@@ -124,7 +124,7 @@ def main():
         ]
         print('')
         answer7 = prompt(questions=question_7)
-        testing_mode = answer7.get('testing_run')
+        testing_mode = True if answer7.get('testing_run') == 'Yes' else False
 
         with open(f'{os.path.join(helpdesk_ansible_dir, "vars", "it_helpdesk_config.yaml")}', 'w') as config:
             yaml.dump({'testing_mode': testing_mode,
