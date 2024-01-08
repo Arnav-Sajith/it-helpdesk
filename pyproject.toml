@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "it-helpdesk"
-version = "0.1.417"
+version = "0.1.0"
 description = "test_description"
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
