@@ -18,4 +18,4 @@
             to: '{{ from }}'
             from: '{{ helpdesk_email }}'
             subject: "Help with your {{ targets }} request"
-            body: "{{ lookup('file', '{{ helpdesk_dir }}/ansible/help_exemplars/{{ targets }}_help.txt') }}" 
+            body: "{{ lookup('file', '{{ helpdesk_dir }}/ansible/help_templates/{{ targets }}_help.txt') }}" 

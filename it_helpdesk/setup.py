@@ -6,23 +6,23 @@ from InquirerPy import prompt, inquirer
 from InquirerPy.validator import PathValidator
 
 
-
-
 def main():
     package_dir = os.path.dirname(it_helpdesk.__file__)
     ansible_default_files = os.path.join(package_dir, 'ansible')
     question_1 = [
         {'type': 'list',
-         'name': 'interactive_install',
+         'name': 'install',
          'wrap_lines': True,
          'message': 'Welcome to the setup installer for the autonomous it-helpdesk. This software is intended to be used in conjunction with the EMPT IT suite. This tool will set up the directories and configuration files for all of the ansible automation you will be working with. Press Continue to proceed.',
-         'choices': ['Continue'],
+         'choices': ['Continue', 'Exit'],
+         'default': 'continue',
          'qmark': '',
          'amark': ''
         }
     ]
-    prompt(questions=question_1)
-    
+    answer1 = prompt(questions=question_1)
+    if answer1.get('install') == 'Exit':
+        exit()
     while True:
         question_2 = [
             {'type': 'filepath',
@@ -46,7 +46,7 @@ def main():
             try:
                 os.mkdir(helpdesk_dir)
                 shutil.copytree(ansible_default_files, helpdesk_ansible_dir)
-                shutil.copyfile('../mail_script.py', helpdesk_ansible_dir)
+                shutil.copyfile(os.path.join(package_dir,'mail_script.py'), os.path.join(helpdesk_dir,'mail_script.py'))
                 break
 
             except FileExistsError: 
@@ -58,8 +58,9 @@ def main():
         'name': 'org_domain',
         'message': f'Please enter your organizations domain:',
         'validate': lambda answer: 'You must enter a domain for your organization.' \
-            if len(answer) == 0 else True,
+            if len(answer) != 0 else False,
         'amark': '',
+
         'qmark': '',
         'wrap_lines': True,
         }
@@ -70,7 +71,7 @@ def main():
     question_4 = [
         {'type': 'input',
         'name': 'mail_server',
-        'message': f'Please specify the address of your organizations mail server: (leave blank for default - localhost))',
+        'message': f'Please specify the address of your organizations mail server: (leave blank for default: localhost)',
         'amark': '',
         'qmark': '',
         'wrap_lines': True,
@@ -82,7 +83,7 @@ def main():
     question_5 = [
         {'type': 'input',
         'name': 'helpdesk_email',
-        'message': f'Please enter the email address for the it-helpdesk: (leave blank for default - it-helpdesk@{org_domain})',
+        'message': f'Please enter the email address for the it-helpdesk: (leave blank for default: it-helpdesk@{org_domain})',
         'qmark': '',
         'amark': '',
         'wrap_lines': True,
@@ -109,9 +110,13 @@ def main():
                     'mail_server': mail_server,
                     'mail_port': '',
                     'helpdesk_email': helpdesk_email,
-                    'helpdesk_password': helpdesk_password}, config)
-    inquirer.select(message=f'''The default files have been copied to {helpdesk_dir} where they can be manually changed, and the helpdesk should now work. Please
-                    ensure to fill out the Ansible inventory in the directory, and to configure your helpdesks email client to run the script located at {helpdesk_dir}/mail_script.py upon receiving an email. 
+                    'helpdesk_password': helpdesk_password,
+                    'requests_directory': {1: 'help',
+                                           2: 'storage',
+                                           3: 'manage_account', 
+                                           4: 'query_account',
+                                           5: 'manage_users',}}, config)
+    inquirer.select(message=f'''The default files have been copied to {helpdesk_dir} where they can be manually changed, and the helpdesk should now work. Please ensure to fill out the Ansible inventory in the directory, and to configure your helpdesks email client to run the script located at {helpdesk_dir}/mail_script.py upon receiving an email. 
                     Thank you for installing the it-helpdesk.''', choices=["Exit"], qmark='', amark='', wrap_lines=True).execute()
 
 

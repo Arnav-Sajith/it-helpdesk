@@ -1,9 +1,6 @@
-from sys import stdin
 import os
-import email
 from it_helpdesk import request_parser
 import yaml
-from email.policy import default
 from email.utils import parseaddr
 from ansible_runner.config.runner import RunnerConfig
 from ansible_runner.runner import Runner

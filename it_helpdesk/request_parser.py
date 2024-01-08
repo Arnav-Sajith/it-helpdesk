@@ -4,8 +4,6 @@ import shlex
 import os
 import yaml
 
-# for reference
-
 def is_valid_amount(amount: str):
     if amount.isdigit():
         return int(amount)
@@ -15,7 +13,7 @@ def is_valid_amount(amount: str):
         except(ValueError):
             return False
         
-def load_phrases(phrasebook, helpdesk_dir): # implement universal phrases with targets and self-targets
+def load_phrases(phrasebook, helpdesk_dir):
     os.chdir(helpdesk_dir)
     with open(f"phrasebooks/{phrasebook}.txt", "r") as phrases:
         phrases_dict = {}
@@ -29,7 +27,7 @@ def load_phrases(phrasebook, helpdesk_dir): # implement universal phrases with t
     return phrases_dict 
 
 def get_request_type(subject_entered, helpdesk_dir):
-    keywords = load_phrases("keywords", helpdesk_dir)
+    keywords = load_phrases(".keywords", helpdesk_dir)
     subject = subject_entered.lower()
     count = 1
     for request_type in keywords:
