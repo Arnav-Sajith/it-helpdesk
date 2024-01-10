@@ -13,9 +13,9 @@ def is_valid_amount(amount: str):
         except(ValueError):
             return False
         
-def load_phrases(phrasebook, helpdesk_dir):
-    os.chdir(helpdesk_dir)
-    with open(f"phrasebooks/{phrasebook}.txt", "r") as phrases:
+def load_phrases(phrasebook, ansible_dir):
+    phrasebook_path = os.path.join(ansible_dir, 'phrasebooks', f'{phrasebook}.txt')
+    with open(phrasebook_path, "r") as phrases:
         phrases_dict = {}
         key = None  # store the most recent "command" here
         for line in phrases.readlines():
@@ -26,31 +26,32 @@ def load_phrases(phrasebook, helpdesk_dir):
                 phrases_dict[key] = (shlex.split(line))
     return phrases_dict 
 
-def get_request_type(subject_entered, helpdesk_dir):
-    keywords = load_phrases(".keywords", helpdesk_dir)
+def get_request_type(subject_entered, ansible_dir):
+    keywords = load_phrases(".keywords", ansible_dir)
     subject = subject_entered.lower()
-    count = 1
     for request_type in keywords:
         if any(keyword in subject for keyword in keywords[request_type]):
-            return count
-        count += 1
+            request_type_index = list(keywords.keys()).index(request_type) + 1
+            return request_type_index
+    return 0
+        
+def parse_subject_universal(subject_entered : str, email_from : str, body : str, helpdesk_dir : str, config: dict):
+    ansible_dir = os.path.join(helpdesk_dir, 'ansible')
+    request_type = get_request_type(subject_entered, ansible_dir)
+    if request_type == 0:
+        return {'request_type': request_type}
+    requests_directory = config['requests_directory']
+    subject = subject_entered.lower()
+    subject_words = set(subject.split()) # Create a set of subject words, stopping substring matching and improving speed
+    phrases = load_phrases(f"{requests_directory[request_type]}_phrases", ansible_dir)
+    parse_subject_dict = {key: None for key in phrases.keys()}
+    parse_subject_dict.update({'request_type': request_type, 'email': email_from, 'subject': subject_entered, 'body': body, 'phrases': phrases})
+    for phrase in phrases:
+        if any(keyword in subject_words for keyword in phrases[phrase]):
+            parse_subject_dict[phrase] = True            
+    return parse_subject_dict
 
-def parse_subject_universal(subject_entered : str, email_from : str, body : str, helpdesk_dir : str):
-    os.chdir(helpdesk_dir)
-    with open('vars/it_helpdesk_config.yaml') as config:
-        requests_directory = yaml.safe_load(config)['requests_directory']
-        subject = subject_entered.lower()
-        request_type = get_request_type(subject, helpdesk_dir)
-        subject_words = set(subject.split()) # Create a set of subject words, stopping substring matching and improving speed
-        phrases = load_phrases(f"{requests_directory[request_type]}_phrases", helpdesk_dir)
-        parse_subject_dict = {key: None for key in phrases.keys()}
-        parse_subject_dict.update({'request_type': request_type, 'email': email_from, 'body': body, 'phrases': phrases})
-        for phrase in phrases:
-            if any(keyword in subject_words for keyword in phrases[phrase]):
-                parse_subject_dict[phrase] = True            
-        return parse_subject_dict
-
-def parse_body_universal(parsed_subject_dict: dict):
+def parse_body_universal(parsed_subject_dict: dict):    
     parse_body_dict = parsed_subject_dict
     body_words = parsed_subject_dict['body'].split()
     phrases = parsed_subject_dict['phrases']
@@ -92,9 +93,9 @@ def parse_body_universal(parsed_subject_dict: dict):
                 parse_body_dict['selftargets'] = True
             break
 
-    del parse_body_dict['phrases'], parse_body_dict['email'], parse_body_dict['body'], parse_body_dict['selftargets']
+    del parse_body_dict['phrases'], parse_body_dict['email'], parse_body_dict['selftargets'], parse_body_dict['body']
     return parse_body_dict
 
 def execute_request_universal(parsed_body_dict: dict):
-        request_contents = parsed_body_dict
-        return request_contents
+    return parsed_body_dict
+ 

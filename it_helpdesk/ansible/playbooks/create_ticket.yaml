@@ -1,0 +1,13 @@
+- name: Create and delete users in the system
+
+  hosts: jailhost
+  become: true
+  become_method: community.general.doas
+  remote_user: ansible
+  gather_facts: no
+  vars_files:
+    - ../vars/it_helpdesk_config.yaml
+  vars:
+    user_exists: False
+    uuid: 
+  tasks:

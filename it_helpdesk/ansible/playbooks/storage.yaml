@@ -1,12 +1,12 @@
 - name: Increase Storage for User (Create text file)
 
   hosts: jailhost
-
-  gather_facts: no
+  become: true
+  become_method: community.general.doas
+  remote_user: ansible
+  gather_facts: false
     
   vars:
-    ansible_user: ansible
-
     undefined_variables: []
 
     request_amount: "{{ amount | float}}"

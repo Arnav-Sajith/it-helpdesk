@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "it-helpdesk"
-version = "0.1.0"
+version = "0.1.1"
 description = "This is an open-source plaintext email based IT helpdesk that requires no manual interaction."
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
