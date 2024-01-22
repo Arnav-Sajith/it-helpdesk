@@ -12,6 +12,7 @@ ansible-runner = "^2.3.4"
 ansible = "^8.5.0"
 wheel = "^0.42.0"
 inquirerpy = "^0.3.4"
+pytest = "^7.4.4"
 
 [tool.poetry.scripts]
 setup_helpdesk = "it_helpdesk.setup:main"

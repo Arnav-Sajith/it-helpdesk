@@ -19,8 +19,8 @@ def ansible_run(request_type : int, request_contents : dict, ansible_dir: str, c
         runner_config = RunnerConfig(private_data_dir = ansible_dir, inventory="./inventory", playbook=f"{os.path.join(ansible_dir, 'playbooks', playbook_name)}", extravars = request_contents, cmdline=f'{command}')
         runner_config.prepare()
         rc = Runner(config=runner_config)
-        rc.run()
-        return playbook_name
+        output = rc.run()
+        return output
 
 def main(email_msg, helpdesk_dir : str, **kwargs):
     testing_mode = kwargs.get('testing_mode', False)
