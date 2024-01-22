@@ -1,5 +1,6 @@
 import os
 from it_helpdesk import request_parser
+import time
 import yaml
 from email.utils import parseaddr
 from ansible_runner.config.runner import RunnerConfig
@@ -21,7 +22,8 @@ def ansible_run(request_type : int, request_contents : dict, ansible_dir: str, c
         rc.run()
         return playbook_name
 
-def main(email_msg, helpdesk_dir):
+def main(email_msg, helpdesk_dir : str, **kwargs):
+    testing_mode = kwargs.get('testing_mode', False)
     config = load_config(helpdesk_dir)
     ansible_dir = os.path.join(helpdesk_dir, 'ansible')
     address = parseaddr(email_msg['from'])[1] if parseaddr(email_msg['from'])[1] else parseaddr(email_msg['from'])[0]
@@ -31,11 +33,15 @@ def main(email_msg, helpdesk_dir):
     request_type = parsed_subject['request_type']
     if request_type == 0:
         request = {'subject': subject, 'body': body, 'from': address}
-        ansible_run(request_type, request, ansible_dir, config)
     else:
         parsed_body = request_parser.parse_body_universal(parsed_subject)
         request = {**request_parser.execute_request_universal(parsed_body), 'from': address}
-        ansible_run(request['request_type'], request, ansible_dir, config)
+
+    if testing_mode:
+         request['request_type'] = request_type
+         return request_type, request, ansible_dir
+    else:
+        ansible_run(request_type, request, ansible_dir, config)
         
 
 if __name__ == '__main__':

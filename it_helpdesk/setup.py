@@ -111,24 +111,10 @@ def main():
         answer6 = prompt(questions=question_6)
         helpdesk_password = answer6.get('helpdesk_password')
 
-        question_7 = [ 
-            {'type': 'list',
-             'name': 'testing_run',
-             'message': 'Would you like to do a test run with a sample email to ensure setup was successful? This can be changed with the testing_mode flag in the it_helpdesk_config.yaml file at any time. Testing mode will print out an example run without needing a mail server.',
-             'choices': ['Yes', 'No'],
-             'qmark': '',
-             'amark': '',
-             'show_cursor': False,
-             'wrap_lines': True
-            }
-        ]
         print('')
-        answer7 = prompt(questions=question_7)
-        testing_mode = True if answer7.get('testing_run') == 'Yes' else False
 
         with open(f'{os.path.join(helpdesk_ansible_dir, "vars", "it_helpdesk_config.yaml")}', 'w') as config:
-            yaml.dump({'testing_mode': testing_mode,
-                        'helpdesk_dir': helpdesk_dir,
+            yaml.dump({ 'helpdesk_dir': helpdesk_dir,
                         'org_domain': org_domain,
                         'mail_server': mail_server,
                         'mail_port': '',

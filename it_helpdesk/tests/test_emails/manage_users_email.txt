@@ -1,5 +1,5 @@
-From: arnavsajith04@gmail.com
-To: vanrahtijas@gmail.com
+From: employee_email@org.domain
+To: helpdesk_email@org.domain
 Subject: Create new user
 Hello, I'd like to create a new user with the following information:
 username: johnny

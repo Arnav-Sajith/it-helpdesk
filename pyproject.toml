@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "it-helpdesk"
-version = "0.1.1"
+version = "0.1.2"
 description = "This is an open-source plaintext email based IT helpdesk that requires no manual interaction."
 authors = ["Arnav Sajith <arnavsajith04@gmail.com>"]
 license = "MIT Licensed"
@@ -12,7 +12,6 @@ ansible-runner = "^2.3.4"
 ansible = "^8.5.0"
 wheel = "^0.42.0"
 inquirerpy = "^0.3.4"
-
 
 [tool.poetry.scripts]
 setup_helpdesk = "it_helpdesk.setup:main"

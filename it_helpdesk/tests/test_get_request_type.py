@@ -18,7 +18,7 @@ def test_get_request_type():
 				request_type = request_parser.get_request_type(subject, ansible_dir)
 				config_lookup = config['requests_directory'][request_type]
 				assert config_lookup == email_request_type
-
+				
 
 
 test_get_request_type()

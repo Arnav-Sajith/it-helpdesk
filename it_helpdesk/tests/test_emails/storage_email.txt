@@ -1,4 +1,4 @@
-From: arnavsajith04@gmail.com
-To: vanrahtijas@gmail.com
+From: employee_email@org.domain
+To: helpdesk_email@org.domain
 Subject: Increase storage
 Hello, I'd like to increase my storage quota by 9.3 GB please.
