@@ -1,9 +1,0 @@
-set folder=~/Maildir/
-set edit_headers=yes
-set from="arnavsajith04@gmail.com"
-set editor=vim
-set spoolfile=+INBOX
-set timeout=5
-color index blue default ~P
-
-mailboxes +inbox

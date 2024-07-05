@@ -1,0 +1,13 @@
+helpdesk_dir: 
+helpdesk_email: 
+helpdesk_password: 
+mail_port: ''
+mail_server: 
+org_domain: 
+requests_directory:
+  0: unknown_request
+  1: help
+  2: storage
+  3: manage_account
+  4: query_account
+  5: manage_users
